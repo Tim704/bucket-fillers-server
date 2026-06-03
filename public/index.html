@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Bucket Fillers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hanken Grotesk', sans-serif; color: #2B2420;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(233,162,59,0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(42,157,143,0.16), transparent 60%),
+      #FBF6EC;
+    min-height: 100vh; padding: 28px 18px 60px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .kicker { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; font-weight: 700; color: #B08442; }
+  .title { font-family: 'Fraunces', serif; font-weight: 900; line-height: 0.95; font-size: clamp(38px,9vw,68px); margin: 6px 0 4px; letter-spacing: -0.02em; }
+  .sub { font-size: 15px; color: #6B5F54; max-width: 46ch; }
+  .card { background: #FFFDF8; border: 1.5px solid #2B2420; border-radius: 22px; padding: 22px; box-shadow: 6px 6px 0 rgba(43,36,32,0.9); margin-top: 22px; }
+  .card h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin-bottom: 4px; letter-spacing: -0.01em; }
+  .hint { font-size: 13px; color: #8A7E72; margin-bottom: 16px; }
+  .input { width: 100%; font-family: inherit; font-size: 16px; color: #2B2420; background: #FBF6EC; border: 1.5px solid #2B2420; border-radius: 12px; padding: 12px 14px; outline: none; margin-bottom: 12px; }
+  .input:focus { box-shadow: 3px 3px 0 rgba(233,162,59,0.9); }
+  .btn { font-family: 'Hanken Grotesk', sans-serif; font-weight: 700; font-size: 16px; background: #E9A23B; color: #2B2420; border: 1.5px solid #2B2420; border-radius: 12px; padding: 13px 22px; cursor: pointer; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); transition: transform .08s, box-shadow .08s; }
+  .btn:hover { transform: translate(-1px,-1px); }
+  .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(43,36,32,0.9); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .who { display: flex; flex-wrap: wrap; gap: 12px; }
+  .chip { font-weight: 700; font-size: 16px; border: 1.5px solid #2B2420; border-radius: 999px; padding: 11px 20px; cursor: pointer; background: #FFFDF8; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); }
+  .bucketrow { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+  .sliderwrap { flex: 1; min-width: 220px; }
+  .scorebig { font-family: 'Fraunces', serif; font-weight: 900; font-size: 54px; line-height: 1; }
+  .scorelbl { font-size: 13px; color: #8A7E72; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 999px; background: #EADfce; border: 1.5px solid #2B2420; margin-top: 18px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid #2B2420; cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid #2B2420; cursor: pointer; }
+  .today-grid, .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media (max-width:520px){ .today-grid, .stat-grid { grid-template-columns: 1fr; } }
+  .person { border: 1.5px solid #2B2420; border-radius: 16px; padding: 14px; background: #FBF6EC; }
+  .person .nm { font-weight: 700; font-size: 15px; }
+  .person .sc { font-family: 'Fraunces', serif; font-weight: 900; font-size: 34px; margin-top: 4px; }
+  .person .wait { color: #A89C8E; font-size: 14px; margin-top: 10px; font-style: italic; }
+  .banner { margin-top: 18px; border: 1.5px solid #2B2420; border-radius: 16px; padding: 16px 18px; font-weight: 700; font-size: 16px; box-shadow: 4px 4px 0 rgba(43,36,32,0.9); }
+  .stat { border: 1.5px solid #2B2420; border-radius: 16px; padding: 14px; background: #FBF6EC; }
+  .stat .big { font-family: 'Fraunces', serif; font-weight: 900; font-size: 40px; line-height: 1; }
+  .stat .lbl { font-size: 13px; color: #6B5F54; margin-top: 6px; }
+  .verdict { font-family: 'Fraunces', serif; font-size: 19px; line-height: 1.4; margin-top: 16px; }
+  .foot { text-align: center; font-size: 12px; color: #A89C8E; margin-top: 30px; }
+  .link { color: #B08442; cursor: pointer; text-decoration: underline; background: none; border: none; font: inherit; }
+  .legend span { font-size: 13px; font-weight: 700; margin-right: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">The Bucket Fillers</div>
+  <div class="title">Filling buckets,<br>together-ish.</div>
+  <p class="sub">Different cities, mismatched holidays. Log your day, see whose buckets fill up at the same time, and put the theory to the test.</p>
+  <div id="app"></div>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const HAPPY = 7;
+let DB = { members: [], entries: {} };
+let score = 7, note = "";
+
+const todayStr = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const shortDate = (iso) => { const p = iso.split("-"); return p[2]+"/"+p[1]; };
+const me = () => DB.members.find(m => m.slug === localStorage.getItem("bf_me"));
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function api(path, body) {
+  const opt = body ? { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) } : {};
+  const r = await fetch(path, opt);
+  return r.json();
+}
+async function load() { DB = await api("/api/data"); render(); }
+
+async function doSetup() {
+  const names = [0,1,2].map(i => document.getElementById("nm"+i).value);
+  DB = await api("/api/setup", { names });
+  render();
+}
+function pickMe(slug) { localStorage.setItem("bf_me", slug); render(); }
+async function logToday() {
+  const m = me(); if (!m) return;
+  DB = await api("/api/log", { slug:m.slug, date:todayStr(), score, note });
+  render();
+}
+
+function bucketSVG(v) {
+  const frac = Math.max(0, Math.min(1, v/10)), fillH = 70*frac;
+  return '<svg width="84" height="96" viewBox="0 0 84 96">'
+    + '<defs><clipPath id="bkt"><path d="M14 22 L70 22 L62 90 Q42 96 22 90 Z"/></clipPath></defs>'
+    + '<rect x="0" y="'+(92-fillH)+'" width="84" height="'+fillH+'" clip-path="url(#bkt)" fill="#E9A23B"/>'
+    + '<path d="M14 22 L70 22 L62 90 Q42 96 22 90 Z" fill="none" stroke="#2B2420" stroke-width="3"/>'
+    + '<ellipse cx="42" cy="22" rx="29" ry="7" fill="#FFFDF8" stroke="#2B2420" stroke-width="3"/>'
+    + '<path d="M16 24 Q42 6 68 24" fill="none" stroke="#2B2420" stroke-width="3"/></svg>';
+}
+
+function chartSVG() {
+  const dates = new Set();
+  DB.members.forEach(m => Object.keys(DB.entries[m.slug]||{}).forEach(d => dates.add(d)));
+  const days = [...dates].sort();
+  const W = 700, H = 240, pl = 30, pr = 14, pt = 14, pb = 28;
+  const innerW = W-pl-pr, innerH = H-pt-pb;
+  const x = i => days.length<=1 ? pl+innerW/2 : pl + innerW*i/(days.length-1);
+  const y = s => pt + innerH*(1-(s-1)/9);
+  let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  for (let s=2; s<=10; s+=2){ svg += '<line x1="'+pl+'" y1="'+y(s)+'" x2="'+(W-pr)+'" y2="'+y(s)+'" stroke="rgba(43,36,32,0.10)"/>'; svg += '<text x="'+(pl-6)+'" y="'+(y(s)+4)+'" font-size="11" fill="#8A7E72" text-anchor="end">'+s+'</text>'; }
+  svg += '<line x1="'+pl+'" y1="'+y(HAPPY)+'" x2="'+(W-pr)+'" y2="'+y(HAPPY)+'" stroke="#B08442" stroke-dasharray="4 4"/>';
+  days.forEach((d,i) => { if (days.length<=8 || i%Math.ceil(days.length/8)===0) svg += '<text x="'+x(i)+'" y="'+(H-8)+'" font-size="10" fill="#8A7E72" text-anchor="middle">'+shortDate(d)+'</text>'; });
+  DB.members.forEach(m => {
+    const pts = []; days.forEach((d,i) => { const e = (DB.entries[m.slug]||{})[d]; if (e) pts.push([x(i), y(e.score)]); });
+    if (pts.length>1) svg += '<polyline fill="none" stroke="'+m.color+'" stroke-width="3" points="'+pts.map(p=>p[0]+","+p[1]).join(" ")+'"/>';
+    pts.forEach(p => svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="'+m.color+'"/>');
+  });
+  svg += '</svg>';
+  return svg;
+}
+
+function theoryStats() {
+  const dates = new Set();
+  DB.members.forEach(m => Object.keys(DB.entries[m.slug]||{}).forEach(d => dates.add(d)));
+  let full=0, allHappy=0;
+  [...dates].forEach(d => {
+    const ss = DB.members.map(m => (DB.entries[m.slug]||{})[d] && (DB.entries[m.slug][d].score));
+    if (ss.every(s => s != null)) { full++; if (ss.every(s => s>=HAPPY)) allHappy++; }
+  });
+  return { full, allHappy, mixed: full-allHappy };
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const foot = document.getElementById("foot");
+  foot.innerHTML = "";
+
+  if (!DB.members.length) {
+    app.innerHTML = '<div class="card"><h2>Name your bucket fillers</h2>'
+      + '<p class="hint">Set this up once from the Pi or any browser. Everyone shares this same group.</p>'
+      + [0,1,2].map(i => '<input class="input" id="nm'+i+'" placeholder="Friend '+(i+1)+'">').join("")
+      + '<button class="btn" onclick="doSetup()">Create the group</button></div>';
+    return;
+  }
+  if (!me()) {
+    app.innerHTML = '<div class="card"><h2>Which one are you?</h2><p class="hint">Remembered on this device.</p><div class="who">'
+      + DB.members.map(m => '<button class="chip" style="border-color:'+m.color+';color:'+m.color+'" onclick="pickMe(\''+m.slug+'\')">'+esc(m.name)+'</button>').join("")
+      + '</div></div>';
+    return;
+  }
+
+  const m = me(), today = todayStr();
+  const mine = (DB.entries[m.slug]||{})[today];
+  if (mine && score === 7 && !note) { score = mine.score; note = mine.note || ""; }
+
+  const allLogged = DB.members.every(p => (DB.entries[p.slug]||{})[today]);
+  const allHappyToday = allLogged && DB.members.every(p => DB.entries[p.slug][today].score >= HAPPY);
+  const t = theoryStats();
+
+  app.innerHTML =
+    '<div class="card"><h2>Hey '+esc(m.name)+'. How was today?</h2>'
+    + '<p class="hint">'+(mine?"Already logged. Tweak it any time before midnight.":"Slide to fill your bucket. 1 is empty, 10 is overflowing.")+'</p>'
+    + '<div class="bucketrow"><span id="bucket">'+bucketSVG(score)+'</span>'
+    + '<div class="sliderwrap"><span class="scorebig" style="color:'+m.color+'" id="sc">'+score+'</span><span class="scorelbl"> / 10</span>'
+    + '<input type="range" min="1" max="10" value="'+score+'" oninput="onSlide(this.value)"></div></div>'
+    + '<input class="input" style="margin-top:18px" maxlength="140" placeholder="One line on why (optional)" value="'+esc(note)+'" oninput="note=this.value">'
+    + '<button class="btn" style="margin-top:6px" onclick="logToday()">'+(mine?"Update my day":"Fill my bucket")+'</button></div>'
+
+    + '<div class="card"><h2>Today across the group</h2><p class="hint">'+shortDate(today)+'</p><div class="today-grid">'
+    + DB.members.map(p => { const e=(DB.entries[p.slug]||{})[today];
+        return '<div class="person" style="border-color:'+p.color+'"><div class="nm" style="color:'+p.color+'">'+esc(p.name)+'</div>'
+        + (e ? '<div class="sc">'+e.score+'</div>'+(e.note?'<div style="font-size:13px;color:#6B5F54">'+esc(e.note)+'</div>':'') : '<div class="wait">no bucket yet</div>')+'</div>';
+      }).join("")
+    + '</div>'
+    + (allLogged ? '<div class="banner" style="background:'+(allHappyToday?"#DCF0EA":"#FBF6EC")+';border-color:'+(allHappyToday?"#2A9D8F":"#2B2420")+'">'
+        + (allHappyToday ? "Rare event: all buckets are full today. The theory is in trouble." : "Everyone has logged. Not all full today, but the data is in.")+'</div>' : '')
+    + '</div>'
+
+    + '<div class="card"><h2>The Bucket Filler theory</h2><p class="hint">Counting only days when all '+DB.members.length+' of you logged. A good day is '+HAPPY+' or higher.</p>'
+    + '<div class="stat-grid">'
+    + '<div class="stat"><div class="big">'+t.full+'</div><div class="lbl">days you all logged</div></div>'
+    + '<div class="stat"><div class="big" style="color:#2A9D8F">'+t.allHappy+'</div><div class="lbl">days you were all happy at once</div></div>'
+    + '<div class="stat"><div class="big" style="color:#E8654F">'+t.mixed+'</div><div class="lbl">days someone was struggling</div></div>'
+    + '</div><p class="verdict">'
+    + (t.full===0 ? "No shared days yet. Get all of you to log on the same day and the verdict starts here."
+        : t.allHappy===0 ? "So far the theory holds: across "+t.full+" shared day"+(t.full>1?"s":"")+", you have never all been happy at the same time."
+        : "Theory dented. On "+t.allHappy+" of "+t.full+" shared days, all of you were happy at once. That is "+Math.round(t.allHappy/t.full*100)+"% of the time.")
+    + '</p></div>'
+
+    + '<div class="card"><h2>Every bucket, over time</h2><p class="hint">Where the lines rise together, your good days are syncing up.</p>'
+    + chartSVG()
+    + '<div class="legend" style="margin-top:8px">'+DB.members.map(p=>'<span style="color:'+p.color+'">&#9679; '+esc(p.name)+'</span>').join("")+'</div></div>';
+
+  foot.innerHTML = 'Logged in as '+esc(m.name)+'. <button class="link" onclick="localStorage.removeItem(\'bf_me\');render()">not you?</button>';
+}
+
+function onSlide(v) {
+  score = Number(v);
+  document.getElementById("sc").textContent = score;
+  document.getElementById("bucket").innerHTML = bucketSVG(score);
+}
+
+load();
+</script>
+</body>
+</html>
