@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data.json");
 const PUBLIC = path.join(__dirname, "public");
 const PALETTE = ["#E8654F", "#2A9D8F", "#E9A23B", "#6C5CE7"];
+// Fixed colors for the regulars; anyone else falls back to the palette by order.
+const NAMED_COLORS = { tim: "#3A7BD5", owan: "#E0A81C", owen: "#E0A81C", lyon: "#2E9E5B" };
+function colorFor(name, i) { return NAMED_COLORS[String(name).trim().toLowerCase()] || PALETTE[i % PALETTE.length]; }
 
 let db = { members: [], entries: {}, incidents: [] };
 try { db = JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); } catch (e) {}
@@ -15,6 +18,10 @@ try { db = JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); } catch (e) {}
 if (!Array.isArray(db.members)) db.members = [];
 if (!db.entries || typeof db.entries !== "object") db.entries = {};
 if (!Array.isArray(db.incidents)) db.incidents = [];
+// Re-apply the named colors so the regulars get their assigned hue even on an existing data file.
+let _recolored = false;
+db.members.forEach((m, i) => { const c = colorFor(m.name, i); if (m.color !== c) { m.color = c; _recolored = true; } });
+if (_recolored) save();
 
 function save() {
   fs.writeFileSync(DATA_FILE + ".tmp", JSON.stringify(db, null, 2));
@@ -46,7 +53,7 @@ const server = http.createServer(async (req, res) => {
     const body = await readBody(req);
     if (!db.members.length) {
       const names = (body.names || []).map((n) => String(n).trim()).filter(Boolean);
-      db.members = names.map((n, i) => ({ name: n, slug: slugify(n, i), color: PALETTE[i % PALETTE.length], tz: null }));
+      db.members = names.map((n, i) => ({ name: n, slug: slugify(n, i), color: colorFor(n, i), tz: null }));
       db.members.forEach((m) => { if (!db.entries[m.slug]) db.entries[m.slug] = {}; });
       save();
     }
@@ -118,7 +125,7 @@ const server = http.createServer(async (req, res) => {
   fs.readFile(fp, (err, data) => {
     if (err) { res.writeHead(404); res.end("Not found"); return; }
     const ext = path.extname(fp);
-    const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
+    const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon" };
     res.writeHead(200, { "Content-Type": types[ext] || "application/octet-stream" });
     res.end(data);
   });

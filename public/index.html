@@ -4,113 +4,156 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Bucket Fillers</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #FBF6EC; --grad1: rgba(233,162,59,0.18); --grad2: rgba(42,157,143,0.16);
+    --ink: #2B2420; --shadow: rgba(43,36,32,0.9);
+    --card: #FFFDF8; --inset: #FBF6EC;
+    --muted: #6B5F54; --muted2: #8A7E72; --muted3: #A89C8E;
+    --accent: #E9A23B; --gold: #B08442; --track: #EADfce; --hero: #FFF6E4;
+    --hair: rgba(43,36,32,0.12); --hair2: rgba(43,36,32,0.25);
+    --goodbg: #DCF0EA; --focus: rgba(233,162,59,0.9);
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    --bg: #15120D; --grad1: rgba(233,162,59,0.10); --grad2: rgba(42,157,143,0.10);
+    --ink: #F1E7D6; --shadow: rgba(0,0,0,0.55);
+    --card: #221C15; --inset: #2B241B;
+    --muted: #C7BAA6; --muted2: #9E9282; --muted3: #7E7363;
+    --accent: #E9A23B; --gold: #D9B271; --track: #3A3329; --hero: #2A2017;
+    --hair: rgba(241,231,214,0.14); --hair2: rgba(241,231,214,0.26);
+    --goodbg: #1E3A33; --focus: rgba(233,162,59,0.85);
+    color-scheme: dark;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Hanken Grotesk', sans-serif; color: #2B2420;
+    font-family: 'Hanken Grotesk', sans-serif; color: var(--ink);
     background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(233,162,59,0.18), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, rgba(42,157,143,0.16), transparent 60%),
-      #FBF6EC;
+      radial-gradient(1200px 600px at 80% -10%, var(--grad1), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, var(--grad2), transparent 60%),
+      var(--bg);
     min-height: 100vh; padding: 28px 18px 60px;
+    transition: background-color .25s ease, color .25s ease;
   }
   .wrap { max-width: 760px; margin: 0 auto; }
-  .kicker { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; font-weight: 700; color: #B08442; }
+  .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .themebtn { font-size: 18px; line-height: 1; width: 44px; height: 44px; flex: none; border: 1.5px solid var(--ink); border-radius: 12px; background: var(--card); cursor: pointer; box-shadow: 3px 3px 0 var(--shadow); transition: transform .08s, box-shadow .08s; }
+  .themebtn:hover { transform: translate(-1px,-1px); }
+  .themebtn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); }
+  .kicker { font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; font-weight: 700; color: var(--gold); }
   .title { font-family: 'Fraunces', serif; font-weight: 900; line-height: 0.95; font-size: clamp(38px,9vw,68px); margin: 6px 0 4px; letter-spacing: -0.02em; }
-  .sub { font-size: 15px; color: #6B5F54; max-width: 46ch; }
-  .card { background: #FFFDF8; border: 1.5px solid #2B2420; border-radius: 22px; padding: 22px; box-shadow: 6px 6px 0 rgba(43,36,32,0.9); margin-top: 22px; }
+  .sub { font-size: 15px; color: var(--muted); max-width: 46ch; }
+  .card { background: var(--card); border: 1.5px solid var(--ink); border-radius: 22px; padding: 22px; box-shadow: 6px 6px 0 var(--shadow); margin-top: 22px; }
   .card h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin-bottom: 4px; letter-spacing: -0.01em; }
-  .hint { font-size: 13px; color: #8A7E72; margin-bottom: 16px; }
-  .input { width: 100%; font-family: inherit; font-size: 16px; color: #2B2420; background: #FBF6EC; border: 1.5px solid #2B2420; border-radius: 12px; padding: 12px 14px; outline: none; margin-bottom: 12px; }
-  .input:focus { box-shadow: 3px 3px 0 rgba(233,162,59,0.9); }
-  .btn { font-family: 'Hanken Grotesk', sans-serif; font-weight: 700; font-size: 16px; background: #E9A23B; color: #2B2420; border: 1.5px solid #2B2420; border-radius: 12px; padding: 13px 22px; cursor: pointer; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); transition: transform .08s, box-shadow .08s; }
+  .hint { font-size: 13px; color: var(--muted2); margin-bottom: 16px; }
+  .input { width: 100%; font-family: inherit; font-size: 16px; color: var(--ink); background: var(--inset); border: 1.5px solid var(--ink); border-radius: 12px; padding: 12px 14px; outline: none; margin-bottom: 12px; }
+  .input:focus { box-shadow: 3px 3px 0 var(--focus); }
+  .btn { font-family: 'Hanken Grotesk', sans-serif; font-weight: 700; font-size: 16px; background: var(--accent); color: #2B2420; border: 1.5px solid var(--ink); border-radius: 12px; padding: 13px 22px; cursor: pointer; box-shadow: 3px 3px 0 var(--shadow); transition: transform .08s, box-shadow .08s; }
   .btn:hover { transform: translate(-1px,-1px); }
-  .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(43,36,32,0.9); }
+  .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn.small { font-size: 13px; padding: 9px 16px; box-shadow: 2px 2px 0 rgba(43,36,32,0.9); }
+  .btn.small { font-size: 13px; padding: 9px 16px; box-shadow: 2px 2px 0 var(--shadow); }
   .who { display: flex; flex-wrap: wrap; gap: 12px; }
-  .chip { font-weight: 700; font-size: 16px; border: 1.5px solid #2B2420; border-radius: 999px; padding: 11px 20px; cursor: pointer; background: #FFFDF8; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); }
+  .chip { font-weight: 700; font-size: 16px; border: 1.5px solid var(--ink); border-radius: 999px; padding: 11px 20px; cursor: pointer; background: var(--card); box-shadow: 3px 3px 0 var(--shadow); }
   .bucketrow { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
   .sliderwrap { flex: 1; min-width: 220px; }
   .scorebig { font-family: 'Fraunces', serif; font-weight: 900; font-size: 54px; line-height: 1; }
-  .scorelbl { font-size: 13px; color: #8A7E72; }
-  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 999px; background: #EADfce; border: 1.5px solid #2B2420; margin-top: 18px; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid #2B2420; cursor: pointer; }
-  input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid #2B2420; cursor: pointer; }
+  .scorelbl { font-size: 13px; color: var(--muted2); }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 999px; background: var(--track); border: 1.5px solid var(--ink); margin-top: 18px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid var(--ink); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid var(--ink); cursor: pointer; }
   .today-grid, .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
   @media (max-width:520px){ .today-grid, .stat-grid { grid-template-columns: 1fr; } }
-  .person { border: 1.5px solid #2B2420; border-radius: 16px; padding: 14px; background: #FBF6EC; }
+  .person { border: 1.5px solid var(--ink); border-radius: 16px; padding: 14px; background: var(--inset); }
   .person .nm { font-weight: 700; font-size: 15px; }
   .person .sc { font-family: 'Fraunces', serif; font-weight: 900; font-size: 34px; margin-top: 4px; }
-  .person .wait { color: #A89C8E; font-size: 14px; margin-top: 10px; font-style: italic; }
-  .pday { font-size: 11px; color: #8A7E72; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  .pnote { font-size: 13px; color: #6B5F54; }
-  .banner { margin-top: 18px; border: 1.5px solid #2B2420; border-radius: 16px; padding: 16px 18px; font-weight: 700; font-size: 16px; box-shadow: 4px 4px 0 rgba(43,36,32,0.9); }
-  .stat { border: 1.5px solid #2B2420; border-radius: 16px; padding: 14px; background: #FBF6EC; }
+  .person .wait { color: var(--muted3); font-size: 14px; margin-top: 10px; font-style: italic; }
+  .pday { font-size: 11px; color: var(--muted2); font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .pnote { font-size: 13px; color: var(--muted); }
+  .banner { margin-top: 18px; border: 1.5px solid var(--ink); border-radius: 16px; padding: 16px 18px; font-weight: 700; font-size: 16px; box-shadow: 4px 4px 0 var(--shadow); }
+  .stat { border: 1.5px solid var(--ink); border-radius: 16px; padding: 14px; background: var(--inset); }
   .stat .big { font-family: 'Fraunces', serif; font-weight: 900; font-size: 40px; line-height: 1; }
-  .stat .lbl { font-size: 13px; color: #6B5F54; margin-top: 6px; }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 6px; }
   .verdict { font-family: 'Fraunces', serif; font-size: 19px; line-height: 1.4; margin-top: 16px; }
-  .foot { text-align: center; font-size: 12px; color: #A89C8E; margin-top: 30px; }
-  .link { color: #B08442; cursor: pointer; text-decoration: underline; background: none; border: none; font: inherit; }
+  .foot { text-align: center; font-size: 12px; color: var(--muted3); margin-top: 30px; }
+  .link { color: var(--gold); cursor: pointer; text-decoration: underline; background: none; border: none; font: inherit; }
   .legend span { font-size: 13px; font-weight: 700; margin-right: 16px; }
 
   /* --- Right now: live clocks + timezones --- */
-  .hero { background: linear-gradient(180deg, #FFFDF8, #FFF6E4); }
-  .kick2 { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 700; color: #B08442; }
-  .herodate { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(17px,4.4vw,22px); margin-top: 6px; color: #6B5F54; }
+  .hero { background: linear-gradient(180deg, var(--card), var(--hero)); }
+  .kick2 { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 700; color: var(--gold); }
+  .herodate { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(17px,4.4vw,22px); margin-top: 6px; color: var(--muted); }
   .heroclock { font-family: 'Fraunces', serif; font-weight: 900; font-size: clamp(48px,14vw,88px); line-height: 0.92; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-  .herotz { font-size: 13px; color: #8A7E72; font-weight: 600; margin-top: 2px; }
+  .herotz { font-size: 13px; color: var(--muted2); font-weight: 600; margin-top: 2px; }
   .tzstrip { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-  .tzpill { flex: 1; min-width: 116px; border: 1.5px solid #2B2420; border-radius: 14px; padding: 10px 12px; background: #FBF6EC; }
-  .tzpill.me { background: #FFFDF8; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); }
+  .tzpill { flex: 1; min-width: 116px; border: 1.5px solid var(--ink); border-radius: 14px; padding: 10px 12px; background: var(--inset); }
+  .tzpill.me { background: var(--card); box-shadow: 3px 3px 0 var(--shadow); }
   .tzpill.off { opacity: 0.55; }
   .tpn { font-weight: 700; font-size: 13px; }
   .tpt { font-family: 'Fraunces', serif; font-weight: 900; font-size: 26px; line-height: 1.2; font-variant-numeric: tabular-nums; }
-  .tpl { font-size: 11px; color: #8A7E72; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .youtag { font-size: 10px; background: #2B2420; color: #FFF; border-radius: 6px; padding: 1px 5px; }
+  .tpl { font-size: 11px; color: var(--muted2); font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .youtag { font-size: 10px; background: var(--ink); color: var(--card); border-radius: 6px; padding: 1px 5px; }
   .dbadge { font-size: 10px; border-radius: 6px; padding: 1px 5px; font-weight: 700; }
-  .dbadge.ahead { background: #E9A23B; color: #2B2420; }
-  .dbadge.behind { background: #E5DAC6; color: #6B5F54; }
+  .dbadge.ahead { background: var(--accent); color: #2B2420; }
+  .dbadge.behind { background: var(--track); color: var(--muted); }
   .tztools { margin-top: 18px; }
-  .tzq { font-size: 13px; font-weight: 700; color: #6B5F54; }
+  .tzq { font-size: 13px; font-weight: 700; color: var(--muted); }
   .tzchips { display: flex; gap: 8px; flex-wrap: wrap; margin: 9px 0; }
-  .tzchip { font-weight: 700; font-size: 13px; border: 1.5px solid #2B2420; border-radius: 999px; padding: 7px 14px; cursor: pointer; background: #FFFDF8; }
-  .tzchip.on { background: #2B2420; color: #FFF; }
-  .tzsel { width: 100%; font-family: inherit; font-size: 14px; color: #2B2420; background: #FBF6EC; border: 1.5px solid #2B2420; border-radius: 10px; padding: 9px 12px; }
-  .nudge { margin-top: 14px; border: 1.5px dashed #B08442; border-radius: 12px; padding: 12px 14px; font-size: 14px; background: #FFF6E4; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tzchip { font-weight: 700; font-size: 13px; border: 1.5px solid var(--ink); border-radius: 999px; padding: 7px 14px; cursor: pointer; background: var(--card); color: var(--ink); }
+  .tzchip.on { background: var(--ink); color: var(--card); }
+  .tzsel { width: 100%; font-family: inherit; font-size: 14px; color: var(--ink); background: var(--inset); border: 1.5px solid var(--ink); border-radius: 10px; padding: 9px 12px; }
+  .nudge { margin-top: 14px; border: 1.5px dashed var(--gold); border-radius: 12px; padding: 12px 14px; font-size: 14px; background: var(--hero); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
   /* --- Incident reports --- */
   .compose { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 6px 0 2px; }
   .compose .incin { flex: 1; min-width: 200px; margin-bottom: 0; }
-  .tonetoggle { display: inline-flex; border: 1.5px solid #2B2420; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
-  .tt { font-family: inherit; font-weight: 700; font-size: 13px; border: none; background: #FBF6EC; padding: 10px 12px; cursor: pointer; color: #8A7E72; }
+  .tonetoggle { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+  .tt { font-family: inherit; font-weight: 700; font-size: 13px; border: none; background: var(--inset); padding: 10px 12px; cursor: pointer; color: var(--muted2); }
   .tt.up.on { background: #DCF0EA; color: #2A9D8F; }
   .tt.down.on { background: #FBE7E2; color: #E8654F; }
   .feed { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .incident { border: 1.5px solid #2B2420; border-left-width: 6px; border-radius: 14px; padding: 12px 14px; background: #FBF6EC; }
+  .incident { border: 1.5px solid var(--ink); border-left-width: 6px; border-radius: 14px; padding: 12px 14px; background: var(--inset); }
   .inchead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .tbadge { font-size: 11px; font-weight: 700; border: 1.5px solid; border-radius: 999px; padding: 2px 9px; }
   .incwho { font-weight: 700; }
-  .incmeta { font-size: 12px; color: #8A7E72; margin-left: auto; font-variant-numeric: tabular-nums; }
+  .incmeta { font-size: 12px; color: var(--muted2); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .whenrow { margin: 4px 0 2px; }
+  .whenlbl { font-size: 12px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; }
+  .whentz { font-weight: 600; color: var(--muted2); }
+  .whenin { max-width: 260px; margin-bottom: 0; }
   .inctitle { font-family: 'Fraunces', serif; font-size: 18px; margin-top: 7px; line-height: 1.3; }
-  .resps { margin-top: 11px; display: flex; flex-direction: column; gap: 9px; border-top: 1px solid rgba(43,36,32,0.12); padding-top: 11px; }
+  .inczones { margin-top: 7px; font-size: 12px; color: var(--muted2); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+  .inczones .zlbl { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; color: var(--gold); }
+  .inczones .zitem { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .resps { margin-top: 11px; display: flex; flex-direction: column; gap: 9px; border-top: 1px solid var(--hair); padding-top: 11px; }
   .resp { font-size: 14px; }
-  .rdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #2B2420; margin-right: 6px; }
+  .rdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink); margin-right: 6px; }
   .rwho { font-weight: 700; }
-  .rmeta { font-size: 12px; color: #8A7E72; }
-  .rwhat { margin: 3px 0 0 15px; color: #2B2420; }
-  .respondbox { margin-top: 11px; border-top: 1px dashed rgba(43,36,32,0.25); padding-top: 11px; display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
+  .rmeta { font-size: 12px; color: var(--muted2); }
+  .rwhat { margin: 3px 0 0 15px; color: var(--ink); }
+  .respondbox { margin-top: 11px; border-top: 1px dashed var(--hair2); padding-top: 11px; display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
   .respondbox .input { margin-bottom: 0; }
-  .recall { font-size: 13px; color: #6B5F54; }
-  .recall b { color: #B08442; }
-  .mineflag { margin-top: 9px; font-size: 12px; color: #8A7E72; font-style: italic; }
+  .recall { font-size: 13px; color: var(--muted); }
+  .recall b { color: var(--gold); }
+  .mineflag { margin-top: 9px; font-size: 12px; color: var(--muted2); font-style: italic; }
 </style>
+<script>
+  // Apply saved/preferred theme before first paint to avoid a flash.
+  (function(){ try { var s = localStorage.getItem("bf_theme");
+    var dark = s ? s === "dark" : (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  } catch (e) { document.documentElement.setAttribute("data-theme", "light"); } })();
+</script>
 </head>
 <body>
 <div class="wrap">
-  <div class="kicker">The Bucket Fillers</div>
+  <div class="topbar">
+    <div class="kicker">The Bucket Fillers</div>
+    <button class="themebtn" id="themebtn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+  </div>
   <div class="title">Filling buckets,<br>together-ish.</div>
   <p class="sub">Different cities, mismatched holidays, scrambled clocks. Log your day, see whose buckets fill up at the same moment, and put the theory to the test.</p>
   <div id="app"></div>
@@ -155,6 +198,27 @@ function allZones() { try { return Intl.supportedValuesOf("timeZone"); } catch (
 const shortDate = (iso) => { const p = iso.split("-"); return p[2]+"/"+p[1]; };
 function ago(ts) { const s = Math.max(0, Math.floor((Date.now()-ts)/1000)); if (s < 45) return "just now"; const m = Math.floor(s/60); if (m < 1) return "1m ago"; if (m < 60) return m+"m ago"; const h = Math.floor(m/60); if (h < 24) return h+"h ago"; return Math.floor(h/24)+"d ago"; }
 
+// Turn a wall-clock time, read in a specific zone, into a UTC timestamp (no deps, DST-safe).
+function tzPartsAsUTC(ts, tz) {
+  const p = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false }).formatToParts(new Date(ts));
+  const g = t => Number(p.find(x => x.type === t).value);
+  let h = g("hour"); if (h === 24) h = 0;
+  return Date.UTC(g("year"), g("month")-1, g("day"), h, g("minute"), g("second"));
+}
+function zonedToUTC(y, mo, d, h, mi, tz) {
+  const wall = Date.UTC(y, mo-1, d, h, mi, 0);
+  let ts = wall;
+  for (let i = 0; i < 3; i++) ts = wall - (tzPartsAsUTC(ts, tz) - ts); // converges past DST jumps
+  return ts;
+}
+function inputToUTC(v, tz) { const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(v||""); return m ? zonedToUTC(+m[1], +m[2], +m[3], +m[4], +m[5], tz) : null; }
+function nowLocalInput(tz) {
+  const p = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", hour12:false }).formatToParts(new Date());
+  const g = t => p.find(x => x.type === t).value;
+  let h = g("hour"); if (h === "24") h = "00";
+  return g("year")+"-"+g("month")+"-"+g("day")+"T"+h+":"+g("minute"); // for <input type=datetime-local>
+}
+
 async function api(path, body) {
   const opt = body ? { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) } : {};
   const r = await fetch(path, opt);
@@ -184,7 +248,10 @@ async function logToday() {
 }
 async function reportIncident() {
   const m = me(); const t = (incTitle||"").trim(); if (!m || !t) return;
-  DB = await api("/api/incident", { slug:m.slug, tone:incTone, title:t, ts:Date.now() });
+  const el = document.getElementById("incWhen");      // user-picked time, read in their current zone
+  const picked = el && inputToUTC(el.value, myTz());
+  const ts = picked != null ? picked : Date.now();
+  DB = await api("/api/incident", { slug:m.slug, tone:incTone, title:t, ts });
   incTitle = ""; incTone = "positive"; render();
 }
 async function respond(id) {
@@ -203,10 +270,10 @@ function bucketSVG(v) {
   const frac = Math.max(0, Math.min(1, v/10)), fillH = 70*frac;
   return '<svg width="84" height="96" viewBox="0 0 84 96">'
     + '<defs><clipPath id="bkt"><path d="M14 22 L70 22 L62 90 Q42 96 22 90 Z"/></clipPath></defs>'
-    + '<rect x="0" y="'+(92-fillH)+'" width="84" height="'+fillH+'" clip-path="url(#bkt)" fill="#E9A23B"/>'
-    + '<path d="M14 22 L70 22 L62 90 Q42 96 22 90 Z" fill="none" stroke="#2B2420" stroke-width="3"/>'
-    + '<ellipse cx="42" cy="22" rx="29" ry="7" fill="#FFFDF8" stroke="#2B2420" stroke-width="3"/>'
-    + '<path d="M16 24 Q42 6 68 24" fill="none" stroke="#2B2420" stroke-width="3"/></svg>';
+    + '<rect x="0" y="'+(92-fillH)+'" width="84" height="'+fillH+'" clip-path="url(#bkt)" style="fill:var(--accent)"/>'
+    + '<path d="M14 22 L70 22 L62 90 Q42 96 22 90 Z" fill="none" style="stroke:var(--ink)" stroke-width="3"/>'
+    + '<ellipse cx="42" cy="22" rx="29" ry="7" style="fill:var(--card);stroke:var(--ink)" stroke-width="3"/>'
+    + '<path d="M16 24 Q42 6 68 24" fill="none" style="stroke:var(--ink)" stroke-width="3"/></svg>';
 }
 
 function chartSVG() {
@@ -218,9 +285,9 @@ function chartSVG() {
   const x = i => days.length<=1 ? pl+innerW/2 : pl + innerW*i/(days.length-1);
   const y = s => pt + innerH*(1-(s-1)/9);
   let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
-  for (let s=2; s<=10; s+=2){ svg += '<line x1="'+pl+'" y1="'+y(s)+'" x2="'+(W-pr)+'" y2="'+y(s)+'" stroke="rgba(43,36,32,0.10)"/>'; svg += '<text x="'+(pl-6)+'" y="'+(y(s)+4)+'" font-size="11" fill="#8A7E72" text-anchor="end">'+s+'</text>'; }
-  svg += '<line x1="'+pl+'" y1="'+y(HAPPY)+'" x2="'+(W-pr)+'" y2="'+y(HAPPY)+'" stroke="#B08442" stroke-dasharray="4 4"/>';
-  days.forEach((d,i) => { if (days.length<=8 || i%Math.ceil(days.length/8)===0) svg += '<text x="'+x(i)+'" y="'+(H-8)+'" font-size="10" fill="#8A7E72" text-anchor="middle">'+shortDate(d)+'</text>'; });
+  for (let s=2; s<=10; s+=2){ svg += '<line x1="'+pl+'" y1="'+y(s)+'" x2="'+(W-pr)+'" y2="'+y(s)+'" style="stroke:var(--hair)"/>'; svg += '<text x="'+(pl-6)+'" y="'+(y(s)+4)+'" font-size="11" style="fill:var(--muted2)" text-anchor="end">'+s+'</text>'; }
+  svg += '<line x1="'+pl+'" y1="'+y(HAPPY)+'" x2="'+(W-pr)+'" y2="'+y(HAPPY)+'" style="stroke:var(--gold)" stroke-dasharray="4 4"/>';
+  days.forEach((d,i) => { if (days.length<=8 || i%Math.ceil(days.length/8)===0) svg += '<text x="'+x(i)+'" y="'+(H-8)+'" font-size="10" style="fill:var(--muted2)" text-anchor="middle">'+shortDate(d)+'</text>'; });
   DB.members.forEach(m => {
     const pts = []; days.forEach((d,i) => { const e = (DB.entries[m.slug]||{})[d]; if (e) pts.push([x(i), y(e.score)]); });
     if (pts.length>1) svg += '<polyline fill="none" stroke="'+m.color+'" stroke-width="3" points="'+pts.map(p=>p[0]+","+p[1]).join(" ")+'"/>';
@@ -322,7 +389,7 @@ function groupCard() {
   const allLogged = logged.every(Boolean);
   const allHappy = allLogged && logged.every(e => e.score >= HAPPY);
   const banner = allLogged
-    ? '<div class="banner" style="background:'+(allHappy?"#DCF0EA":"#FBF6EC")+';border-color:'+(allHappy?"#2A9D8F":"#2B2420")+'">'
+    ? '<div class="banner" style="background:'+(allHappy?"var(--goodbg)":"var(--inset)")+';border-color:'+(allHappy?"#2A9D8F":"var(--ink)")+'">'
       + (allHappy ? "Rare event: everyone’s bucket is full at the same moment. The theory is in trouble." : "Everyone’s logged their current day. Not all full, but the data is in.")+'</div>'
     : "";
   return '<div class="card"><h2>Right now across the group</h2>'
@@ -345,6 +412,10 @@ function renderIncident(inc) {
     + '<span class="incwho" style="color:'+author.color+'">'+esc(author.name)+'</span>'
     + '<span class="incmeta">'+esc(timeAt(authorTz, inc.ts))+' their time &middot; <span data-ago="'+inc.ts+'">'+esc(ago(inc.ts))+'</span></span></div>';
   const title = '<div class="inctitle">'+esc(inc.title)+'</div>';
+  const zones = '<div class="inczones"><span class="zlbl">across zones</span>'
+    + DB.members.map(p => { const tz = effTz(p) || myTz();
+        return '<span class="zitem" style="color:'+p.color+'">'+esc(p.name)+' '+esc(timeAt(tz, inc.ts))+'</span>'; }).join("")
+    + '</div>';
   const resp = (inc.responses||[]).map(r => {
     const rp = DB.members.find(x => x.slug === r.slug) || { name:"?", color:"#888" };
     const rtz = effTz(rp) || myTz(), rt = TONES[r.tone]||TONES.positive;
@@ -365,13 +436,15 @@ function renderIncident(inc) {
     box = '<div class="mineflag">Your report &middot; '+n+' '+(n===1?"reply":"replies")+'</div>';
   }
   return '<div class="incident" style="border-left-color:'+(TONES[inc.tone]||TONES.positive).col+'">'
-    + head + title + (resp ? '<div class="resps">'+resp+'</div>' : '') + box + '</div>';
+    + head + title + zones + (resp ? '<div class="resps">'+resp+'</div>' : '') + box + '</div>';
 }
 
 function incidentsCard() {
   const compose = '<div class="compose">'+toneToggle("inc", incTone)
     + '<input class="input incin" maxlength="160" placeholder="What just happened? (good or rough)" value="'+esc(incTitle)+'" oninput="incTitle=this.value">'
-    + '<button class="btn" onclick="reportIncident()">Report it</button></div>';
+    + '<button class="btn" onclick="reportIncident()">Report it</button></div>'
+    + '<div class="whenrow"><label class="whenlbl" for="incWhen">When did it happen? <span class="whentz">read as your '+esc(tzLabel(myTz()))+' time</span></label>'
+    + '<input type="datetime-local" id="incWhen" class="input whenin" value="'+nowLocalInput(myTz())+'"></div>';
   const feed = DB.incidents.slice().sort((a,b) => b.ts - a.ts).map(renderIncident).join("")
     || '<p class="hint" style="margin-top:10px">No reports yet. When something good or rough happens, drop it here — everyone else sees the exact time it was for them and answers what they were living through.</p>';
   return '<div class="card"><h2>Incident reports</h2>'
@@ -434,6 +507,16 @@ function onSlide(v) {
   document.getElementById("bucket").innerHTML = bucketSVG(score);
 }
 
+// Dark mode: CSS variables flip on the <html> data-theme attribute, so nothing needs re-rendering.
+function paintThemeBtn() { const b = document.getElementById("themebtn"); if (b) b.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; }
+function toggleTheme() {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("bf_theme", next); } catch (e) {}
+  paintThemeBtn();
+}
+
+paintThemeBtn();
 load();
 </script>
 </body>

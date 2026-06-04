@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- The Bucket Fillers — an amber bucket, echoing the in-app bucketSVG -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#FBF6EC" stroke="#2B2420" stroke-width="3"/>
+  <path d="M18 26 L46 26 L40 49 Q32 53 24 49 Z" fill="#E9A23B" stroke="#2B2420" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M20 26 Q32 11 44 26" fill="none" stroke="#2B2420" stroke-width="3.5" stroke-linecap="round"/>
+  <ellipse cx="32" cy="26" rx="14" ry="4" fill="#FFFDF8" stroke="#2B2420" stroke-width="3.5"/>
+</svg>

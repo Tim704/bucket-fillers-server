@@ -1,0 +1,44 @@
+{
+  "members": [
+    {
+      "name": "Tim",
+      "slug": "tim0",
+      "color": "#3A7BD5",
+      "tz": "Asia/Makassar"
+    },
+    {
+      "name": "Owan",
+      "slug": "owan1",
+      "color": "#E0A81C",
+      "tz": null
+    },
+    {
+      "name": "Lyon",
+      "slug": "lyon2",
+      "color": "#2E9E5B",
+      "tz": null
+    }
+  ],
+  "entries": {
+    "tim0": {
+      "2026-06-04": {
+        "score": 7,
+        "note": "gonna be a good day",
+        "ts": 1780553413730,
+        "tz": "Asia/Makassar"
+      }
+    },
+    "owan1": {},
+    "lyon2": {}
+  },
+  "incidents": [
+    {
+      "id": "mpz3j9ls4rek1",
+      "slug": "tim0",
+      "tone": "positive",
+      "title": "claude finished coding",
+      "ts": 1780553422428,
+      "responses": []
+    }
+  ]
+}
