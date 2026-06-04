@@ -29,6 +29,7 @@
   .btn:hover { transform: translate(-1px,-1px); }
   .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 rgba(43,36,32,0.9); }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.small { font-size: 13px; padding: 9px 16px; box-shadow: 2px 2px 0 rgba(43,36,32,0.9); }
   .who { display: flex; flex-wrap: wrap; gap: 12px; }
   .chip { font-weight: 700; font-size: 16px; border: 1.5px solid #2B2420; border-radius: 999px; padding: 11px 20px; cursor: pointer; background: #FFFDF8; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); }
   .bucketrow { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
@@ -44,6 +45,8 @@
   .person .nm { font-weight: 700; font-size: 15px; }
   .person .sc { font-family: 'Fraunces', serif; font-weight: 900; font-size: 34px; margin-top: 4px; }
   .person .wait { color: #A89C8E; font-size: 14px; margin-top: 10px; font-style: italic; }
+  .pday { font-size: 11px; color: #8A7E72; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .pnote { font-size: 13px; color: #6B5F54; }
   .banner { margin-top: 18px; border: 1.5px solid #2B2420; border-radius: 16px; padding: 16px 18px; font-weight: 700; font-size: 16px; box-shadow: 4px 4px 0 rgba(43,36,32,0.9); }
   .stat { border: 1.5px solid #2B2420; border-radius: 16px; padding: 14px; background: #FBF6EC; }
   .stat .big { font-family: 'Fraunces', serif; font-weight: 900; font-size: 40px; line-height: 1; }
@@ -52,26 +55,105 @@
   .foot { text-align: center; font-size: 12px; color: #A89C8E; margin-top: 30px; }
   .link { color: #B08442; cursor: pointer; text-decoration: underline; background: none; border: none; font: inherit; }
   .legend span { font-size: 13px; font-weight: 700; margin-right: 16px; }
+
+  /* --- Right now: live clocks + timezones --- */
+  .hero { background: linear-gradient(180deg, #FFFDF8, #FFF6E4); }
+  .kick2 { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 700; color: #B08442; }
+  .herodate { font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(17px,4.4vw,22px); margin-top: 6px; color: #6B5F54; }
+  .heroclock { font-family: 'Fraunces', serif; font-weight: 900; font-size: clamp(48px,14vw,88px); line-height: 0.92; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .herotz { font-size: 13px; color: #8A7E72; font-weight: 600; margin-top: 2px; }
+  .tzstrip { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .tzpill { flex: 1; min-width: 116px; border: 1.5px solid #2B2420; border-radius: 14px; padding: 10px 12px; background: #FBF6EC; }
+  .tzpill.me { background: #FFFDF8; box-shadow: 3px 3px 0 rgba(43,36,32,0.9); }
+  .tzpill.off { opacity: 0.55; }
+  .tpn { font-weight: 700; font-size: 13px; }
+  .tpt { font-family: 'Fraunces', serif; font-weight: 900; font-size: 26px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .tpl { font-size: 11px; color: #8A7E72; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .youtag { font-size: 10px; background: #2B2420; color: #FFF; border-radius: 6px; padding: 1px 5px; }
+  .dbadge { font-size: 10px; border-radius: 6px; padding: 1px 5px; font-weight: 700; }
+  .dbadge.ahead { background: #E9A23B; color: #2B2420; }
+  .dbadge.behind { background: #E5DAC6; color: #6B5F54; }
+  .tztools { margin-top: 18px; }
+  .tzq { font-size: 13px; font-weight: 700; color: #6B5F54; }
+  .tzchips { display: flex; gap: 8px; flex-wrap: wrap; margin: 9px 0; }
+  .tzchip { font-weight: 700; font-size: 13px; border: 1.5px solid #2B2420; border-radius: 999px; padding: 7px 14px; cursor: pointer; background: #FFFDF8; }
+  .tzchip.on { background: #2B2420; color: #FFF; }
+  .tzsel { width: 100%; font-family: inherit; font-size: 14px; color: #2B2420; background: #FBF6EC; border: 1.5px solid #2B2420; border-radius: 10px; padding: 9px 12px; }
+  .nudge { margin-top: 14px; border: 1.5px dashed #B08442; border-radius: 12px; padding: 12px 14px; font-size: 14px; background: #FFF6E4; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* --- Incident reports --- */
+  .compose { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 6px 0 2px; }
+  .compose .incin { flex: 1; min-width: 200px; margin-bottom: 0; }
+  .tonetoggle { display: inline-flex; border: 1.5px solid #2B2420; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+  .tt { font-family: inherit; font-weight: 700; font-size: 13px; border: none; background: #FBF6EC; padding: 10px 12px; cursor: pointer; color: #8A7E72; }
+  .tt.up.on { background: #DCF0EA; color: #2A9D8F; }
+  .tt.down.on { background: #FBE7E2; color: #E8654F; }
+  .feed { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .incident { border: 1.5px solid #2B2420; border-left-width: 6px; border-radius: 14px; padding: 12px 14px; background: #FBF6EC; }
+  .inchead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tbadge { font-size: 11px; font-weight: 700; border: 1.5px solid; border-radius: 999px; padding: 2px 9px; }
+  .incwho { font-weight: 700; }
+  .incmeta { font-size: 12px; color: #8A7E72; margin-left: auto; font-variant-numeric: tabular-nums; }
+  .inctitle { font-family: 'Fraunces', serif; font-size: 18px; margin-top: 7px; line-height: 1.3; }
+  .resps { margin-top: 11px; display: flex; flex-direction: column; gap: 9px; border-top: 1px solid rgba(43,36,32,0.12); padding-top: 11px; }
+  .resp { font-size: 14px; }
+  .rdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #2B2420; margin-right: 6px; }
+  .rwho { font-weight: 700; }
+  .rmeta { font-size: 12px; color: #8A7E72; }
+  .rwhat { margin: 3px 0 0 15px; color: #2B2420; }
+  .respondbox { margin-top: 11px; border-top: 1px dashed rgba(43,36,32,0.25); padding-top: 11px; display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
+  .respondbox .input { margin-bottom: 0; }
+  .recall { font-size: 13px; color: #6B5F54; }
+  .recall b { color: #B08442; }
+  .mineflag { margin-top: 9px; font-size: 12px; color: #8A7E72; font-style: italic; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="kicker">The Bucket Fillers</div>
   <div class="title">Filling buckets,<br>together-ish.</div>
-  <p class="sub">Different cities, mismatched holidays. Log your day, see whose buckets fill up at the same time, and put the theory to the test.</p>
+  <p class="sub">Different cities, mismatched holidays, scrambled clocks. Log your day, see whose buckets fill up at the same moment, and put the theory to the test.</p>
   <div id="app"></div>
   <div class="foot" id="foot"></div>
 </div>
 
 <script>
 const HAPPY = 7;
-let DB = { members: [], entries: {} };
+let DB = { members: [], entries: {}, incidents: [] };
 let score = 7, note = "";
+let incTone = "positive", incTitle = "";
+const respText = {}, respTone = {};
 
-const todayStr = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
-const shortDate = (iso) => { const p = iso.split("-"); return p[2]+"/"+p[1]; };
-const me = () => DB.members.find(m => m.slug === localStorage.getItem("bf_me"));
+// ---- timezones: each person carries their current zone; clocks are computed in it ----
+const DEVICE_TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) { return "UTC"; } })();
+const TZ_PRESETS = [
+  { tz: "Europe/Berlin", label: "Germany" },
+  { tz: "Asia/Makassar", label: "Bali" },
+  { tz: "Australia/Perth", label: "Perth" },
+];
+const TONES = {
+  positive: { sym: "▲", word: "good",  col: "#2A9D8F", bg: "#DCF0EA" },
+  negative: { sym: "▼", word: "rough", col: "#E8654F", bg: "#FBE7E2" },
+};
+
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const me = () => DB.members.find(m => m.slug === localStorage.getItem("bf_me"));
+const isMe = (p) => { const m = me(); return !!m && p.slug === m.slug; };
+const myTz = () => { const m = me(); return (m && m.tz) || DEVICE_TZ; };
+const effTz = (p) => p.tz || (isMe(p) ? DEVICE_TZ : null);
+
+function fmt(tz, opts) { try { return new Intl.DateTimeFormat("en-GB", Object.assign({ timeZone: tz }, opts)).format(new Date()); } catch (e) { return ""; } }
+function clockSec(tz) { return fmt(tz, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) || "--:--:--"; }
+function clockMin(tz) { return fmt(tz, { hour: "2-digit", minute: "2-digit", hour12: false }) || "--:--"; }
+function longDate(tz) { return fmt(tz, { weekday: "long", day: "numeric", month: "long" }) || ""; }
+function todayLocal() { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function dateInTz(tz, ts) { try { return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit" }).format(ts==null?new Date():new Date(ts)); } catch (e) { return todayLocal(); } }
+function timeAt(tz, ts) { try { return new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false }).format(new Date(ts)); } catch (e) { return ""; } }
+function offsetLabel(tz) { try { const p = new Intl.DateTimeFormat("en-GB", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(new Date()).find(x => x.type === "timeZoneName"); return p ? p.value : ""; } catch (e) { return ""; } }
+function tzLabel(tz) { const p = TZ_PRESETS.find(x => x.tz === tz); return p ? p.label : String(tz||"").split("/").pop().replace(/_/g, " "); }
+function allZones() { try { return Intl.supportedValuesOf("timeZone"); } catch (e) { return TZ_PRESETS.map(p => p.tz).concat([DEVICE_TZ, "UTC"]); } }
+const shortDate = (iso) => { const p = iso.split("-"); return p[2]+"/"+p[1]; };
+function ago(ts) { const s = Math.max(0, Math.floor((Date.now()-ts)/1000)); if (s < 45) return "just now"; const m = Math.floor(s/60); if (m < 1) return "1m ago"; if (m < 60) return m+"m ago"; const h = Math.floor(m/60); if (h < 24) return h+"h ago"; return Math.floor(h/24)+"d ago"; }
 
 async function api(path, body) {
   const opt = body ? { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) } : {};
@@ -85,11 +167,36 @@ async function doSetup() {
   DB = await api("/api/setup", { names });
   render();
 }
-function pickMe(slug) { localStorage.setItem("bf_me", slug); render(); }
+async function pickMe(slug) {
+  localStorage.setItem("bf_me", slug);
+  const m = DB.members.find(x => x.slug === slug);
+  if (m && !m.tz) DB = await api("/api/member", { slug, tz: DEVICE_TZ }); // seed from this device
+  render();
+}
+function leaveMe() { localStorage.removeItem("bf_me"); render(); }
+async function setMyTz(tz) { const m = me(); if (!m || !tz) return; DB = await api("/api/member", { slug: m.slug, tz }); render(); }
+
 async function logToday() {
   const m = me(); if (!m) return;
-  DB = await api("/api/log", { slug:m.slug, date:todayStr(), score, note });
+  const tz = myTz();
+  DB = await api("/api/log", { slug:m.slug, date:dateInTz(tz), score, note, ts:Date.now(), tz });
   render();
+}
+async function reportIncident() {
+  const m = me(); const t = (incTitle||"").trim(); if (!m || !t) return;
+  DB = await api("/api/incident", { slug:m.slug, tone:incTone, title:t, ts:Date.now() });
+  incTitle = ""; incTone = "positive"; render();
+}
+async function respond(id) {
+  const m = me(); const w = (respText[id]||"").trim(); if (!m || !w) return;
+  DB = await api("/api/respond", { id, slug:m.slug, tone:respTone[id]||"positive", what:w });
+  respText[id] = ""; render();
+}
+function setTone(key, t) {
+  if (key === "inc") incTone = t; else respTone[key.slice(1)] = t;
+  const wrap = document.getElementById("tt_"+key); if (!wrap) return;
+  wrap.querySelector(".up").classList.toggle("on", t === "positive");
+  wrap.querySelector(".down").classList.toggle("on", t === "negative");
 }
 
 function bucketSVG(v) {
@@ -134,6 +241,165 @@ function theoryStats() {
   return { full, allHappy, mixed: full-allHappy };
 }
 
+// ---- live "right now" pieces (repainted every second; hold no inputs) ----
+function heroLiveHTML() {
+  const tz = myTz();
+  return '<div class="herodate">'+esc(longDate(tz))+'</div>'
+    + '<div class="heroclock">'+esc(clockSec(tz))+'</div>'
+    + '<div class="herotz">'+esc(tzLabel(tz))+' &middot; '+esc(offsetLabel(tz))+'</div>';
+}
+function tzStripHTML() {
+  const myDay = dateInTz(myTz());
+  return DB.members.map(p => {
+    const tz = effTz(p);
+    if (!tz) return '<div class="tzpill off"><div class="tpn" style="color:'+p.color+'">'+esc(p.name)+'</div>'
+      + '<div class="tpt">--:--</div><div class="tpl">checks in soon</div></div>';
+    const day = dateInTz(tz);
+    let badge = "";
+    if (day > myDay) badge = '<span class="dbadge ahead">next day</span>';
+    else if (day < myDay) badge = '<span class="dbadge behind">prev day</span>';
+    return '<div class="tzpill'+(isMe(p)?" me":"")+'" style="border-color:'+p.color+'">'
+      + '<div class="tpn" style="color:'+p.color+'">'+esc(p.name)+(isMe(p)?' <span class="youtag">you</span>':'')+'</div>'
+      + '<div class="tpt">'+esc(clockMin(tz))+'</div>'
+      + '<div class="tpl">'+esc(tzLabel(tz))+badge+'</div></div>';
+  }).join("");
+}
+function paintClocks() {
+  const live = document.getElementById("heroLive"); if (live) live.innerHTML = heroLiveHTML();
+  const strip = document.getElementById("tzStrip"); if (strip) strip.innerHTML = tzStripHTML();
+  document.querySelectorAll("[data-ago]").forEach(el => { el.textContent = ago(Number(el.getAttribute("data-ago"))); });
+}
+let clockTimer = null;
+function startClock() { if (!clockTimer) clockTimer = setInterval(paintClocks, 1000); }
+
+// ---- cards ----
+function tzControls() {
+  const cur = myTz();
+  const presets = TZ_PRESETS.concat([{ tz: DEVICE_TZ, label: "Here · "+tzLabel(DEVICE_TZ) }]);
+  const seen = {};
+  const chips = presets.filter(p => seen[p.tz] ? false : (seen[p.tz]=1)).map(p =>
+    '<button class="tzchip'+(p.tz===cur?" on":"")+'" onclick="setMyTz(\''+p.tz+'\')">'+esc(p.label)+'</button>').join("");
+  const opts = allZones().map(z => '<option value="'+z+'"'+(z===cur?" selected":"")+'>'+esc(z)+'</option>').join("");
+  return '<div class="tztools"><span class="tzq">Where are you right now?</span>'
+    + '<div class="tzchips">'+chips+'</div>'
+    + '<select class="tzsel" onchange="setMyTz(this.value)">'+opts+'</select></div>';
+}
+function tzNudge() {
+  const m = me(); if (!m || !m.tz || m.tz === DEVICE_TZ) return "";
+  return '<div class="nudge"><span>This device looks like <b>'+esc(tzLabel(DEVICE_TZ))+'</b>, but you’re set to <b>'+esc(tzLabel(m.tz))+'</b>.</span>'
+    + '<button class="btn small" onclick="setMyTz(\''+DEVICE_TZ+'\')">I’m in '+esc(tzLabel(DEVICE_TZ))+' now</button></div>';
+}
+function heroCard() {
+  return '<div class="card hero"><div class="kick2">Right now &middot; '+esc(tzLabel(myTz()))+'</div>'
+    + '<div id="heroLive">'+heroLiveHTML()+'</div>'
+    + '<div id="tzStrip" class="tzstrip">'+tzStripHTML()+'</div>'
+    + tzControls() + tzNudge() + '</div>';
+}
+
+function logCard(m, mine, tz) {
+  return '<div class="card"><h2>Hey '+esc(m.name)+'. How was today?</h2>'
+    + '<p class="hint">'+(mine?"Logged for ":"Filling your bucket for ")+'<b>'+esc(longDate(tz))+'</b>'
+      + (mine?". Tweak it any time before your midnight.":". 1 is empty, 10 is overflowing.")+'</p>'
+    + '<div class="bucketrow"><span id="bucket">'+bucketSVG(score)+'</span>'
+    + '<div class="sliderwrap"><span class="scorebig" style="color:'+m.color+'" id="sc">'+score+'</span><span class="scorelbl"> / 10</span>'
+    + '<input type="range" min="1" max="10" value="'+score+'" oninput="onSlide(this.value)"></div></div>'
+    + '<input class="input" style="margin-top:18px" maxlength="140" placeholder="One line on why (optional)" value="'+esc(note)+'" oninput="note=this.value">'
+    + '<button class="btn" style="margin-top:6px" onclick="logToday()">'+(mine?"Update my day":"Fill my bucket")+'</button></div>';
+}
+
+function groupCard() {
+  const myDay = dateInTz(myTz());
+  const cells = DB.members.map(p => {
+    const tz = effTz(p) || myTz(), pDay = dateInTz(tz);
+    const e = (DB.entries[p.slug]||{})[pDay];
+    const when = (pDay !== myDay ? "their "+shortDate(pDay)+" &middot; " : "") + clockMin(tz) + " now";
+    return '<div class="person" style="border-color:'+p.color+'"><div class="nm" style="color:'+p.color+'">'+esc(p.name)+'</div>'
+      + '<div class="pday">'+esc(when)+'</div>'
+      + (e ? '<div class="sc">'+e.score+'</div>'+(e.note?'<div class="pnote">'+esc(e.note)+'</div>':'') : '<div class="wait">no bucket yet</div>')
+      + '</div>';
+  }).join("");
+  const logged = DB.members.map(p => { const tz = effTz(p)||myTz(); return (DB.entries[p.slug]||{})[dateInTz(tz)]; });
+  const allLogged = logged.every(Boolean);
+  const allHappy = allLogged && logged.every(e => e.score >= HAPPY);
+  const banner = allLogged
+    ? '<div class="banner" style="background:'+(allHappy?"#DCF0EA":"#FBF6EC")+';border-color:'+(allHappy?"#2A9D8F":"#2B2420")+'">'
+      + (allHappy ? "Rare event: everyone’s bucket is full at the same moment. The theory is in trouble." : "Everyone’s logged their current day. Not all full, but the data is in.")+'</div>'
+    : "";
+  return '<div class="card"><h2>Right now across the group</h2>'
+    + '<p class="hint">Each person’s newest bucket, counted in their own local day.</p>'
+    + '<div class="today-grid">'+cells+'</div>'+banner+'</div>';
+}
+
+function toneToggle(key, cur) {
+  return '<div class="tonetoggle" id="tt_'+key+'">'
+    + '<button class="tt up'+(cur==="positive"?" on":"")+'" onclick="setTone(\''+key+'\',\'positive\')">'+TONES.positive.sym+' good</button>'
+    + '<button class="tt down'+(cur==="negative"?" on":"")+'" onclick="setTone(\''+key+'\',\'negative\')">'+TONES.negative.sym+' rough</button></div>';
+}
+function toneBadge(t) { const c = TONES[t]||TONES.positive; return '<span class="tbadge" style="background:'+c.bg+';color:'+c.col+';border-color:'+c.col+'">'+c.sym+' '+c.word+'</span>'; }
+
+function renderIncident(inc) {
+  const author = DB.members.find(x => x.slug === inc.slug) || { name:"?", color:"#888" };
+  const authorTz = effTz(author) || myTz();
+  const m = me();
+  const head = '<div class="inchead">'+toneBadge(inc.tone)
+    + '<span class="incwho" style="color:'+author.color+'">'+esc(author.name)+'</span>'
+    + '<span class="incmeta">'+esc(timeAt(authorTz, inc.ts))+' their time &middot; <span data-ago="'+inc.ts+'">'+esc(ago(inc.ts))+'</span></span></div>';
+  const title = '<div class="inctitle">'+esc(inc.title)+'</div>';
+  const resp = (inc.responses||[]).map(r => {
+    const rp = DB.members.find(x => x.slug === r.slug) || { name:"?", color:"#888" };
+    const rtz = effTz(rp) || myTz(), rt = TONES[r.tone]||TONES.positive;
+    return '<div class="resp"><span class="rdot" style="background:'+rt.col+'"></span>'
+      + '<span class="rwho" style="color:'+rp.color+'">'+esc(rp.name)+'</span> '
+      + '<span class="rmeta">&mdash; '+esc(timeAt(rtz, inc.ts))+' for them</span>'
+      + '<div class="rwhat">'+esc(r.what)+'</div></div>';
+  }).join("");
+  let box = "";
+  const responded = (inc.responses||[]).some(r => m && r.slug === m.slug);
+  if (m && m.slug !== inc.slug && !responded) {
+    box = '<div class="respondbox"><div class="recall">It was <b>'+esc(timeAt(myTz(), inc.ts))+'</b> for you. What was happening to you around then?</div>'
+      + toneToggle("r"+inc.id, respTone[inc.id]||"positive")
+      + '<input class="input" maxlength="160" placeholder="What you were living through…" value="'+esc(respText[inc.id]||"")+'" oninput="respText[\''+inc.id+'\']=this.value">'
+      + '<button class="btn small" onclick="respond(\''+inc.id+'\')">Add my moment</button></div>';
+  } else if (m && m.slug === inc.slug) {
+    const n = (inc.responses||[]).length;
+    box = '<div class="mineflag">Your report &middot; '+n+' '+(n===1?"reply":"replies")+'</div>';
+  }
+  return '<div class="incident" style="border-left-color:'+(TONES[inc.tone]||TONES.positive).col+'">'
+    + head + title + (resp ? '<div class="resps">'+resp+'</div>' : '') + box + '</div>';
+}
+
+function incidentsCard() {
+  const compose = '<div class="compose">'+toneToggle("inc", incTone)
+    + '<input class="input incin" maxlength="160" placeholder="What just happened? (good or rough)" value="'+esc(incTitle)+'" oninput="incTitle=this.value">'
+    + '<button class="btn" onclick="reportIncident()">Report it</button></div>';
+  const feed = DB.incidents.slice().sort((a,b) => b.ts - a.ts).map(renderIncident).join("")
+    || '<p class="hint" style="margin-top:10px">No reports yet. When something good or rough happens, drop it here — everyone else sees the exact time it was for them and answers what they were living through.</p>';
+  return '<div class="card"><h2>Incident reports</h2>'
+    + '<p class="hint">Report a moment. The others reply with whatever was happening to them at that same instant.</p>'
+    + compose + '<div class="feed">'+feed+'</div></div>';
+}
+
+function theoryCard() {
+  const t = theoryStats();
+  return '<div class="card"><h2>The Bucket Filler theory</h2>'
+    + '<p class="hint">Counting only days when all '+DB.members.length+' of you logged, each in your own local calendar. A good day is '+HAPPY+' or higher.</p>'
+    + '<div class="stat-grid">'
+    + '<div class="stat"><div class="big">'+t.full+'</div><div class="lbl">days you all logged</div></div>'
+    + '<div class="stat"><div class="big" style="color:#2A9D8F">'+t.allHappy+'</div><div class="lbl">days you were all happy at once</div></div>'
+    + '<div class="stat"><div class="big" style="color:#E8654F">'+t.mixed+'</div><div class="lbl">days someone was struggling</div></div>'
+    + '</div><p class="verdict">'
+    + (t.full===0 ? "No shared days yet. Get all of you to log on the same day and the verdict starts here."
+        : t.allHappy===0 ? "So far the theory holds: across "+t.full+" shared day"+(t.full>1?"s":"")+", you have never all been happy at the same time."
+        : "Theory dented. On "+t.allHappy+" of "+t.full+" shared days, all of you were happy at once. That is "+Math.round(t.allHappy/t.full*100)+"% of the time.")
+    + '</p></div>';
+}
+
+function chartCard() {
+  return '<div class="card"><h2>Every bucket, over time</h2><p class="hint">Where the lines rise together, your good days are syncing up.</p>'
+    + chartSVG()
+    + '<div class="legend" style="margin-top:8px">'+DB.members.map(p=>'<span style="color:'+p.color+'">&#9679; '+esc(p.name)+'</span>').join("")+'</div></div>';
+}
+
 function render() {
   const app = document.getElementById("app");
   const foot = document.getElementById("foot");
@@ -147,55 +413,19 @@ function render() {
     return;
   }
   if (!me()) {
-    app.innerHTML = '<div class="card"><h2>Which one are you?</h2><p class="hint">Remembered on this device.</p><div class="who">'
+    app.innerHTML = '<div class="card"><h2>Which one are you?</h2><p class="hint">Remembered on this device. We’ll set your timezone from it — change it any time you travel.</p><div class="who">'
       + DB.members.map(m => '<button class="chip" style="border-color:'+m.color+';color:'+m.color+'" onclick="pickMe(\''+m.slug+'\')">'+esc(m.name)+'</button>').join("")
       + '</div></div>';
     return;
   }
 
-  const m = me(), today = todayStr();
+  const m = me(), tz = myTz(), today = dateInTz(tz);
   const mine = (DB.entries[m.slug]||{})[today];
   if (mine && score === 7 && !note) { score = mine.score; note = mine.note || ""; }
 
-  const allLogged = DB.members.every(p => (DB.entries[p.slug]||{})[today]);
-  const allHappyToday = allLogged && DB.members.every(p => DB.entries[p.slug][today].score >= HAPPY);
-  const t = theoryStats();
-
-  app.innerHTML =
-    '<div class="card"><h2>Hey '+esc(m.name)+'. How was today?</h2>'
-    + '<p class="hint">'+(mine?"Already logged. Tweak it any time before midnight.":"Slide to fill your bucket. 1 is empty, 10 is overflowing.")+'</p>'
-    + '<div class="bucketrow"><span id="bucket">'+bucketSVG(score)+'</span>'
-    + '<div class="sliderwrap"><span class="scorebig" style="color:'+m.color+'" id="sc">'+score+'</span><span class="scorelbl"> / 10</span>'
-    + '<input type="range" min="1" max="10" value="'+score+'" oninput="onSlide(this.value)"></div></div>'
-    + '<input class="input" style="margin-top:18px" maxlength="140" placeholder="One line on why (optional)" value="'+esc(note)+'" oninput="note=this.value">'
-    + '<button class="btn" style="margin-top:6px" onclick="logToday()">'+(mine?"Update my day":"Fill my bucket")+'</button></div>'
-
-    + '<div class="card"><h2>Today across the group</h2><p class="hint">'+shortDate(today)+'</p><div class="today-grid">'
-    + DB.members.map(p => { const e=(DB.entries[p.slug]||{})[today];
-        return '<div class="person" style="border-color:'+p.color+'"><div class="nm" style="color:'+p.color+'">'+esc(p.name)+'</div>'
-        + (e ? '<div class="sc">'+e.score+'</div>'+(e.note?'<div style="font-size:13px;color:#6B5F54">'+esc(e.note)+'</div>':'') : '<div class="wait">no bucket yet</div>')+'</div>';
-      }).join("")
-    + '</div>'
-    + (allLogged ? '<div class="banner" style="background:'+(allHappyToday?"#DCF0EA":"#FBF6EC")+';border-color:'+(allHappyToday?"#2A9D8F":"#2B2420")+'">'
-        + (allHappyToday ? "Rare event: all buckets are full today. The theory is in trouble." : "Everyone has logged. Not all full today, but the data is in.")+'</div>' : '')
-    + '</div>'
-
-    + '<div class="card"><h2>The Bucket Filler theory</h2><p class="hint">Counting only days when all '+DB.members.length+' of you logged. A good day is '+HAPPY+' or higher.</p>'
-    + '<div class="stat-grid">'
-    + '<div class="stat"><div class="big">'+t.full+'</div><div class="lbl">days you all logged</div></div>'
-    + '<div class="stat"><div class="big" style="color:#2A9D8F">'+t.allHappy+'</div><div class="lbl">days you were all happy at once</div></div>'
-    + '<div class="stat"><div class="big" style="color:#E8654F">'+t.mixed+'</div><div class="lbl">days someone was struggling</div></div>'
-    + '</div><p class="verdict">'
-    + (t.full===0 ? "No shared days yet. Get all of you to log on the same day and the verdict starts here."
-        : t.allHappy===0 ? "So far the theory holds: across "+t.full+" shared day"+(t.full>1?"s":"")+", you have never all been happy at the same time."
-        : "Theory dented. On "+t.allHappy+" of "+t.full+" shared days, all of you were happy at once. That is "+Math.round(t.allHappy/t.full*100)+"% of the time.")
-    + '</p></div>'
-
-    + '<div class="card"><h2>Every bucket, over time</h2><p class="hint">Where the lines rise together, your good days are syncing up.</p>'
-    + chartSVG()
-    + '<div class="legend" style="margin-top:8px">'+DB.members.map(p=>'<span style="color:'+p.color+'">&#9679; '+esc(p.name)+'</span>').join("")+'</div></div>';
-
-  foot.innerHTML = 'Logged in as '+esc(m.name)+'. <button class="link" onclick="localStorage.removeItem(\'bf_me\');render()">not you?</button>';
+  app.innerHTML = heroCard() + logCard(m, mine, tz) + groupCard() + incidentsCard() + theoryCard() + chartCard();
+  foot.innerHTML = 'Logged in as '+esc(m.name)+' &middot; '+esc(tzLabel(tz))+'. <button class="link" onclick="leaveMe()">not you?</button>';
+  startClock();
 }
 
 function onSlide(v) {
