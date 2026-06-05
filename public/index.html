@@ -66,7 +66,7 @@
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid var(--ink); cursor: pointer; }
   input[type=range]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #E8654F; border: 1.5px solid var(--ink); cursor: pointer; }
   .today-grid, .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-  @media (max-width:520px){ .today-grid, .stat-grid { grid-template-columns: 1fr; } }
+  @media (max-width:520px){ .today-grid, .stat-grid, .stat-grid.two { grid-template-columns: 1fr; } }
   .person { border: 1.5px solid var(--ink); border-radius: 16px; padding: 14px; background: var(--inset); }
   .person .nm { font-weight: 700; font-size: 15px; }
   .person .sc { font-family: 'Fraunces', serif; font-weight: 900; font-size: 34px; margin-top: 4px; }
@@ -81,6 +81,12 @@
   .foot { text-align: center; font-size: 12px; color: var(--muted3); margin-top: 30px; }
   .link { color: var(--gold); cursor: pointer; text-decoration: underline; background: none; border: none; font: inherit; }
   .legend span { font-size: 13px; font-weight: 700; margin-right: 16px; }
+  .link:disabled { opacity: 0.4; cursor: default; text-decoration: none; }
+  .incnav { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; }
+  .incnav .incday { flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .incnav .incday b { font-weight: 700; color: var(--ink); }
+  .substat { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair); }
+  .stat-grid.two { grid-template-columns: repeat(2, 1fr); }
 
   /* --- Right now: live clocks + timezones --- */
   .hero { background: linear-gradient(180deg, var(--card), var(--hero)); }
@@ -168,7 +174,7 @@ const HAPPY = 7;
 let DB = { members: [], entries: {}, incidents: [] };
 let score = 7, note = "";
 let logWhen = "";   // datetime-local string for the day being logged; "" means today / now
-let incTone = "positive", incTitle = "", incWhen = "";
+let incTone = "positive", incTitle = "", incWhen = "", incDayOffset = 0;
 const respText = {}, respTone = {};
 
 // ---- timezones: each person carries their current zone; clocks are computed in it ----
@@ -198,10 +204,15 @@ function longDateOf(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso||""); i
 function todayLocal() { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function dateInTz(tz, ts) { try { return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit" }).format(ts==null?new Date():new Date(ts)); } catch (e) { return todayLocal(); } }
 function timeAt(tz, ts) { try { return new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false }).format(new Date(ts)); } catch (e) { return ""; } }
+function hmAt(tz, ts) { try { return new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour:"2-digit", minute:"2-digit", hour12:false }).format(new Date(ts)); } catch (e) { return ""; } }
 function offsetLabel(tz) { try { const p = new Intl.DateTimeFormat("en-GB", { timeZone: tz, timeZoneName: "shortOffset" }).formatToParts(new Date()).find(x => x.type === "timeZoneName"); return p ? p.value : ""; } catch (e) { return ""; } }
 function tzLabel(tz) { const p = TZ_PRESETS.find(x => x.tz === tz); return p ? p.label : String(tz||"").split("/").pop().replace(/_/g, " "); }
 function allZones() { try { return Intl.supportedValuesOf("timeZone"); } catch (e) { return TZ_PRESETS.map(p => p.tz).concat([DEVICE_TZ, "UTC"]); } }
 const shortDate = (iso) => { const p = iso.split("-"); return p[2]+"/"+p[1]; };
+// Shift a YYYY-MM-DD calendar day by whole days (UTC math keeps it DST-proof and tz-agnostic).
+function shiftDay(iso, delta) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso); if (!m) return iso; const d = new Date(Date.UTC(+m[1], +m[2]-1, +m[3])); d.setUTCDate(d.getUTCDate()+delta); return d.toISOString().slice(0,10); }
+// Whole days between two YYYY-MM-DD strings (isoA - isoB), via UTC midnight.
+function daysBetween(isoA, isoB) { const p = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s||""); return m ? Date.UTC(+m[1], +m[2]-1, +m[3]) : NaN; }; return Math.round((p(isoA) - p(isoB)) / 86400000); }
 function ago(ts) { const s = Math.max(0, Math.floor((Date.now()-ts)/1000)); if (s < 45) return "just now"; const m = Math.floor(s/60); if (m < 1) return "1m ago"; if (m < 60) return m+"m ago"; const h = Math.floor(m/60); if (h < 24) return h+"h ago"; return Math.floor(h/24)+"d ago"; }
 
 // Turn a wall-clock time, read in a specific zone, into a UTC timestamp (no deps, DST-safe).
@@ -274,7 +285,10 @@ async function reportIncident() {
   const picked = inputToUTC(incWhen || nowLocalInput(myTz()), myTz());   // user-picked time, read in their current zone
   const ts = picked != null ? picked : Date.now();
   DB = await api("/api/incident", { slug:m.slug, tone:incTone, title:t, ts });
-  incTitle = ""; incTone = "positive"; incWhen = ""; render();
+  incTitle = ""; incTone = "positive"; incWhen = "";
+  const off = daysBetween(dateInTz(myTz()), dateInTz(myTz(), ts));   // jump the feed to the day it was filed for
+  incDayOffset = Number.isFinite(off) ? Math.max(0, off) : 0;
+  render();
 }
 async function respond(id) {
   const m = me(); const w = (respText[id]||"").trim(); if (!m || !w) return;
@@ -288,6 +302,8 @@ function setTone(key, t) {
   wrap.querySelector(".down").classList.toggle("on", t === "negative");
   if (key === "inc" && _incPicker) _incPicker.setAccent((TONES[t]||TONES.positive).col); // retint the calendar live
 }
+// Walk the incident feed one local day at a time (delta +1 = older, -1 = newer; floor at today).
+function incDay(delta) { incDayOffset = Math.max(0, incDayOffset + delta); render(); }
 
 function bucketSVG(v) {
   const frac = Math.max(0, Math.min(1, v/10)), fillH = 70*frac;
@@ -329,6 +345,19 @@ function theoryStats() {
     if (ss.every(s => s != null)) { full++; if (ss.every(s => s>=HAPPY)) allHappy++; }
   });
   return { full, allHappy, mixed: full-allHappy };
+}
+
+// Moment-level "bucket filler" tally: across incidents where at least one other person chimed in,
+// how often did a good moment coincide with someone else's rough one (collided) vs everyone in sync.
+function clashStats() {
+  let collided = 0, synced = 0;
+  DB.incidents.forEach(inc => {
+    const tones = [inc.tone].concat((inc.responses||[]).map(r => r.tone));
+    if (tones.length < 2) return;                       // need the author + at least one response
+    const hasGood = tones.includes("positive"), hasRough = tones.includes("negative");
+    if (hasGood && hasRough) collided++; else synced++;
+  });
+  return { collided, synced };
 }
 
 // ---- live "right now" pieces (repainted every second; hold no inputs) ----
@@ -410,9 +439,15 @@ function groupCard() {
   const cells = DB.members.map(p => {
     const tz = effTz(p) || myTz(), pDay = dateInTz(tz);
     const e = (DB.entries[p.slug]||{})[pDay];
-    const when = (pDay !== myDay ? "their "+shortDate(pDay)+" &middot; " : "") + clockMin(tz) + " now";
+    // Show WHEN they posted this bucket (in the zone they logged from), not their current clock.
+    // Prefix is the bucket's own counted day (pDay); guard on a real ts so legacy entries don't show a bare "logged".
+    let when = "";
+    if (e && Number.isFinite(e.ts)) {
+      const ptz = e.tz || tz;
+      when = (pDay !== myDay ? "their "+shortDate(pDay)+" · " : "") + "logged " + hmAt(ptz, e.ts);
+    }
     return '<div class="person" style="border-color:'+p.color+'"><div class="nm" style="color:'+p.color+'">'+esc(p.name)+'</div>'
-      + '<div class="pday">'+esc(when)+'</div>'
+      + (when ? '<div class="pday">'+esc(when)+'</div>' : '')
       + (e ? '<div class="sc">'+e.score+'</div>'+(e.note?'<div class="pnote">'+esc(e.note)+'</div>':'') : '<div class="wait">no bucket yet</div>')
       + '</div>';
   }).join("");
@@ -476,11 +511,25 @@ function incidentsCard() {
     + '<button class="btn" onclick="reportIncident()">Report it</button></div>'
     + '<div class="whenrow"><label class="whenlbl" for="incWhen">When did it happen? <span class="whentz">read as your '+esc(tzLabel(myTz()))+' time</span></label>'
     + '<div id="incWhenMount" class="whenin"></div></div>';
-  const feed = DB.incidents.slice().sort((a,b) => b.ts - a.ts).map(renderIncident).join("")
-    || '<p class="hint" style="margin-top:10px">No reports yet. When something good or rough happens, drop it here — everyone else sees the exact time it was for them and answers what they were living through.</p>';
+  // One local day at a time, counted in the viewer's zone; step back to read previous days.
+  const viewDay = shiftDay(dateInTz(myTz()), -incDayOffset);
+  const isToday = incDayOffset === 0;
+  const dayIncs = DB.incidents.filter(inc => dateInTz(myTz(), inc.ts) === viewDay).sort((a,b) => b.ts - a.ts);
+  const oldestDay = DB.incidents.reduce((min, inc) => { const d = dateInTz(myTz(), inc.ts); return (min === null || d < min) ? d : min; }, null);
+  const canOlder = oldestDay !== null && viewDay > oldestDay;
+  const rel = isToday ? "Today" : (incDayOffset === 1 ? "Yesterday" : "");
+  const nav = '<div class="incnav">'
+    + '<button class="link" onclick="incDay(1)"'+(canOlder?'':' disabled')+'>&larr; earlier</button>'
+    + '<span class="incday">'+(rel?'<b>'+rel+'</b> &middot; ':'')+esc(longDateOf(viewDay))+'</span>'
+    + '<button class="link" onclick="incDay(-1)"'+(isToday?' style="visibility:hidden"':'')+'>'+(incDayOffset===1?'today':'later')+' &rarr;</button>'
+    + '</div>';
+  const feed = dayIncs.map(renderIncident).join("")
+    || '<p class="hint" style="margin-top:10px">'+(isToday
+        ? "No reports yet today. When something good or rough happens, drop it here — everyone else sees the exact time it was for them and answers what they were living through."
+        : "No reports on this day.")+'</p>';
   return '<div class="card"><h2>Incident reports</h2>'
-    + '<p class="hint">Report a moment. The others reply with whatever was happening to them at that same instant.</p>'
-    + compose + '<div class="feed">'+feed+'</div></div>';
+    + '<p class="hint">Report a moment. The others reply with whatever was happening to them at that same instant. The feed shows one day at a time.</p>'
+    + compose + nav + '<div class="feed">'+feed+'</div></div>';
 }
 
 function theoryCard() {
@@ -495,6 +544,22 @@ function theoryCard() {
     + (t.full===0 ? "No shared days yet. Get all of you to log on the same day and the verdict starts here."
         : t.allHappy===0 ? "So far the theory holds: across "+t.full+" shared day"+(t.full>1?"s":"")+", you have never all been happy at the same time."
         : "Theory dented. On "+t.allHappy+" of "+t.full+" shared days, all of you were happy at once. That is "+Math.round(t.allHappy/t.full*100)+"% of the time.")
+    + '</p>' + clashSection() + '</div>';
+}
+
+// Moment-level companion to the daily theory: did your highs land on someone else's lows?
+function clashSection() {
+  const c = clashStats();
+  const total = c.collided + c.synced;
+  return '<div class="substat">'
+    + '<p class="hint">And moment to moment: across reported events where someone else said what they were living through, how often did one of you rise while another fell?</p>'
+    + '<div class="stat-grid two">'
+    + '<div class="stat"><div class="big" style="color:#E8654F">'+c.collided+'</div><div class="lbl">times a good moment for one of you landed on someone else&rsquo;s rough one</div></div>'
+    + '<div class="stat"><div class="big" style="color:#2A9D8F">'+c.synced+'</div><div class="lbl">times you were all feeling the same way at that instant</div></div>'
+    + '</div><p class="verdict">'
+    + (total===0 ? "No overlapping moments yet — report a good or rough event and have someone say what they were living through at that instant."
+        : c.collided===0 ? "So far every shared moment has been in sync — when one of you felt it, the others felt the same."
+        : "On "+c.collided+" of "+total+" shared moment"+(total>1?"s":"")+", one bucket filled as another drained — "+Math.round(c.collided/total*100)+"% were a trade-off.")
     + '</p></div>';
 }
 

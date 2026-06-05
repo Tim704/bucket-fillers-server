@@ -124,7 +124,9 @@ const server = http.createServer(async (req, res) => {
     const inc = db.incidents.find((x) => x.id === body.id);
     const m = member(body.slug);
     const what = clip(body.what, 160).trim();
-    if (inc && m && what) {
+    // Responders must be someone OTHER than the author — keeps the "good at someone else's expense"
+    // collision stat honest even against hand-crafted requests (the UI already hides self-response).
+    if (inc && m && what && m.slug !== inc.slug) {
       if (!Array.isArray(inc.responses)) inc.responses = [];
       const r = { slug: m.slug, tone: tone(body.tone), what, at: Date.now() };
       const i = inc.responses.findIndex((x) => x.slug === m.slug);
