@@ -3,7 +3,7 @@
     {
       "name": "Tim",
       "slug": "tim0",
-      "color": "#3A7BD5",
+      "color": "#2D65A4",
       "tz": "Asia/Makassar"
     },
     {
@@ -25,6 +25,24 @@
         "score": 7,
         "note": "gonna be a good day",
         "ts": 1780553413730,
+        "tz": "Asia/Makassar"
+      },
+      "2026-06-01": {
+        "score": 4,
+        "note": "",
+        "ts": 1780301700000,
+        "tz": "Asia/Makassar"
+      },
+      "2026-06-02": {
+        "score": 2,
+        "note": "",
+        "ts": 1780388160000,
+        "tz": "Asia/Makassar"
+      },
+      "2026-06-05": {
+        "score": 7,
+        "note": "",
+        "ts": 1780647421140,
         "tz": "Asia/Makassar"
       }
     },

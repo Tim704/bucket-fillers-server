@@ -124,6 +124,8 @@
   .whenlbl { font-size: 12px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; }
   .whentz { font-weight: 600; color: var(--muted2); }
   .whenin { max-width: 260px; margin-bottom: 0; }
+  .whenrow.backfilling { border-left: 3px solid var(--accent); padding-left: 12px; }
+  .pastbadge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; background: var(--accent); color: #2B2420; border-radius: 6px; padding: 1px 7px; margin-left: 8px; }
   .inctitle { font-family: 'Fraunces', serif; font-size: 18px; margin-top: 7px; line-height: 1.3; }
   .inczones { margin-top: 7px; font-size: 12px; color: var(--muted2); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
   .inczones .zlbl { font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; color: var(--gold); }
@@ -160,11 +162,13 @@
   <div class="foot" id="foot"></div>
 </div>
 
+<script src="/datetimepicker.js"></script>
 <script>
 const HAPPY = 7;
 let DB = { members: [], entries: {}, incidents: [] };
 let score = 7, note = "";
-let incTone = "positive", incTitle = "";
+let logWhen = "";   // datetime-local string for the day being logged; "" means today / now
+let incTone = "positive", incTitle = "", incWhen = "";
 const respText = {}, respTone = {};
 
 // ---- timezones: each person carries their current zone; clocks are computed in it ----
@@ -189,6 +193,8 @@ function fmt(tz, opts) { try { return new Intl.DateTimeFormat("en-GB", Object.as
 function clockSec(tz) { return fmt(tz, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) || "--:--:--"; }
 function clockMin(tz) { return fmt(tz, { hour: "2-digit", minute: "2-digit", hour12: false }) || "--:--"; }
 function longDate(tz) { return fmt(tz, { weekday: "long", day: "numeric", month: "long" }) || ""; }
+// Long label for a fixed YYYY-MM-DD calendar day (no timezone shift — the date is taken as-is).
+function longDateOf(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso||""); if (!m) return longDate(myTz()); try { return new Intl.DateTimeFormat("en-GB", { timeZone:"UTC", weekday:"long", day:"numeric", month:"long" }).format(new Date(Date.UTC(+m[1], +m[2]-1, +m[3], 12, 0, 0))); } catch (e) { return iso; } }
 function todayLocal() { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function dateInTz(tz, ts) { try { return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year:"numeric", month:"2-digit", day:"2-digit" }).format(ts==null?new Date():new Date(ts)); } catch (e) { return todayLocal(); } }
 function timeAt(tz, ts) { try { return new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday:"short", hour:"2-digit", minute:"2-digit", hour12:false }).format(new Date(ts)); } catch (e) { return ""; } }
@@ -238,21 +244,37 @@ async function pickMe(slug) {
   render();
 }
 function leaveMe() { localStorage.removeItem("bf_me"); render(); }
-async function setMyTz(tz) { const m = me(); if (!m || !tz) return; DB = await api("/api/member", { slug: m.slug, tz }); render(); }
+async function setMyTz(tz) { const m = me(); if (!m || !tz) return; DB = await api("/api/member", { slug: m.slug, tz }); logWhen = ""; render(); }
 
 async function logToday() {
   const m = me(); if (!m) return;
   const tz = myTz();
-  DB = await api("/api/log", { slug:m.slug, date:dateInTz(tz), score, note, ts:Date.now(), tz });
+  const date = logWhen ? logWhen.slice(0, 10) : dateInTz(tz);              // explicit backfill day, or today
+  const ts = logWhen ? (inputToUTC(logWhen, tz) || Date.now()) : Date.now();
+  DB = await api("/api/log", { slug:m.slug, date, score, note, ts, tz });
+  render();   // the just-saved bucket stays in view as confirmation (today stays on today)
+}
+// Switch the log card to a different calendar day, loading whatever was logged for it.
+// Only reload the slider/note when the calendar day actually changes, so nudging the
+// time-of-day within the same day never wipes an in-progress score.
+function onLogWhen(v) {
+  const m = me(); if (!m) return;
+  const prevDate = logWhen ? logWhen.slice(0, 10) : dateInTz(myTz());
+  logWhen = v || "";
+  const newDate = logWhen ? logWhen.slice(0, 10) : dateInTz(myTz());
+  if (newDate !== prevDate) {
+    const e = (DB.entries[m.slug] || {})[newDate];
+    score = e ? Number(e.score) : 7;
+    note = e ? (e.note || "") : "";
+  }
   render();
 }
 async function reportIncident() {
   const m = me(); const t = (incTitle||"").trim(); if (!m || !t) return;
-  const el = document.getElementById("incWhen");      // user-picked time, read in their current zone
-  const picked = el && inputToUTC(el.value, myTz());
+  const picked = inputToUTC(incWhen || nowLocalInput(myTz()), myTz());   // user-picked time, read in their current zone
   const ts = picked != null ? picked : Date.now();
   DB = await api("/api/incident", { slug:m.slug, tone:incTone, title:t, ts });
-  incTitle = ""; incTone = "positive"; render();
+  incTitle = ""; incTone = "positive"; incWhen = ""; render();
 }
 async function respond(id) {
   const m = me(); const w = (respText[id]||"").trim(); if (!m || !w) return;
@@ -264,6 +286,7 @@ function setTone(key, t) {
   const wrap = document.getElementById("tt_"+key); if (!wrap) return;
   wrap.querySelector(".up").classList.toggle("on", t === "positive");
   wrap.querySelector(".down").classList.toggle("on", t === "negative");
+  if (key === "inc" && _incPicker) _incPicker.setAccent((TONES[t]||TONES.positive).col); // retint the calendar live
 }
 
 function bucketSVG(v) {
@@ -363,15 +386,23 @@ function heroCard() {
     + tzControls() + tzNudge() + '</div>';
 }
 
-function logCard(m, mine, tz) {
-  return '<div class="card"><h2>Hey '+esc(m.name)+'. How was today?</h2>'
-    + '<p class="hint">'+(mine?"Logged for ":"Filling your bucket for ")+'<b>'+esc(longDate(tz))+'</b>'
-      + (mine?". Tweak it any time before your midnight.":". 1 is empty, 10 is overflowing.")+'</p>'
+function logCard(m, mine, tz, logDate) {
+  const isToday = logDate === dateInTz(tz);
+  const longLbl = isToday ? longDate(tz) : longDateOf(logDate);
+  const q = isToday ? "How was today?" : "How was "+esc(longLbl)+"?";
+  const btn = (mine ? "Update " : "Fill ") + (isToday ? "my bucket" : "this bucket");
+  return '<div class="card"><h2>Hey '+esc(m.name)+'. '+q+'</h2>'
+    + '<p class="hint">'+(mine?"Logged for ":"Filling your bucket for ")+'<b>'+esc(longLbl)+'</b>'
+      + (mine ? (isToday?". Tweak it any time before your midnight.":". Tweak this backfilled day any time.")
+              : ". 1 is empty, 10 is overflowing.")+'</p>'
+    + '<div class="whenrow'+(isToday?'':' backfilling')+'"><label class="whenlbl" for="logWhen">Which day are you logging? <span class="whentz">read as your '+esc(tzLabel(tz))+' calendar</span>'+(isToday?'':'<span class="pastbadge">backfilling</span>')+'</label>'
+    + (isToday?'':'<button class="link" type="button" style="margin:0 0 10px" onclick="onLogWhen(\'\')">↩ jump back to today</button>')
+    + '<div id="logWhenMount" class="whenin"></div></div>'
     + '<div class="bucketrow"><span id="bucket">'+bucketSVG(score)+'</span>'
     + '<div class="sliderwrap"><span class="scorebig" style="color:'+m.color+'" id="sc">'+score+'</span><span class="scorelbl"> / 10</span>'
     + '<input type="range" min="1" max="10" value="'+score+'" oninput="onSlide(this.value)"></div></div>'
     + '<input class="input" style="margin-top:18px" maxlength="140" placeholder="One line on why (optional)" value="'+esc(note)+'" oninput="note=this.value">'
-    + '<button class="btn" style="margin-top:6px" onclick="logToday()">'+(mine?"Update my day":"Fill my bucket")+'</button></div>';
+    + '<button class="btn" style="margin-top:6px" onclick="logToday()">'+btn+'</button></div>';
 }
 
 function groupCard() {
@@ -444,7 +475,7 @@ function incidentsCard() {
     + '<input class="input incin" maxlength="160" placeholder="What just happened? (good or rough)" value="'+esc(incTitle)+'" oninput="incTitle=this.value">'
     + '<button class="btn" onclick="reportIncident()">Report it</button></div>'
     + '<div class="whenrow"><label class="whenlbl" for="incWhen">When did it happen? <span class="whentz">read as your '+esc(tzLabel(myTz()))+' time</span></label>'
-    + '<input type="datetime-local" id="incWhen" class="input whenin" value="'+nowLocalInput(myTz())+'"></div>';
+    + '<div id="incWhenMount" class="whenin"></div></div>';
   const feed = DB.incidents.slice().sort((a,b) => b.ts - a.ts).map(renderIncident).join("")
     || '<p class="hint" style="margin-top:10px">No reports yet. When something good or rough happens, drop it here — everyone else sees the exact time it was for them and answers what they were living through.</p>';
   return '<div class="card"><h2>Incident reports</h2>'
@@ -473,10 +504,38 @@ function chartCard() {
     + '<div class="legend" style="margin-top:8px">'+DB.members.map(p=>'<span style="color:'+p.color+'">&#9679; '+esc(p.name)+'</span>').join("")+'</div></div>';
 }
 
+// Custom date/time pickers replace the two native datetime-local inputs (log + incident
+// cards). The picked values live in module vars (logWhen / incWhen) so they survive full
+// re-renders; we tear down old instances each render and re-mount onto fresh placeholders.
+let _logPicker = null, _incPicker = null;
+function destroyWhenPickers() {
+  if (_logPicker) { _logPicker.destroy(); _logPicker = null; }
+  if (_incPicker) { _incPicker.destroy(); _incPicker = null; }
+}
+function mountWhenPickers() {
+  if (typeof createDateTimePicker !== "function") return;   // component script not loaded
+  const tz = myTz(), nowS = nowLocalInput(tz);
+  const lm = document.getElementById("logWhenMount");
+  if (lm) _logPicker = createDateTimePicker({
+    mount: lm, value: logWhen || nowS, now: nowS, max: nowS,
+    accent: (me() || {}).color,                             // tint the calendar to "you"
+    ariaLabel: "Choose the day to log",
+    onChange: (v) => onLogWhen(v),
+  });
+  const im = document.getElementById("incWhenMount");
+  if (im) _incPicker = createDateTimePicker({
+    mount: im, value: incWhen || nowS, now: nowS, max: nowS, minuteStep: 5,
+    accent: (TONES[incTone] || TONES.positive).col,         // tint to the good/rough tone
+    ariaLabel: "Choose when it happened",
+    onChange: (v) => { incWhen = v; },
+  });
+}
+
 function render() {
   const app = document.getElementById("app");
   const foot = document.getElementById("foot");
   foot.innerHTML = "";
+  destroyWhenPickers();   // clear pickers from the previous render before rebuilding the DOM
 
   if (!DB.members.length) {
     app.innerHTML = '<div class="card"><h2>Name your bucket fillers</h2>'
@@ -492,12 +551,14 @@ function render() {
     return;
   }
 
-  const m = me(), tz = myTz(), today = dateInTz(tz);
-  const mine = (DB.entries[m.slug]||{})[today];
+  const m = me(), tz = myTz();
+  const logDate = logWhen ? logWhen.slice(0, 10) : dateInTz(tz);
+  const mine = (DB.entries[m.slug]||{})[logDate];
   if (mine && score === 7 && !note) { score = mine.score; note = mine.note || ""; }
 
-  app.innerHTML = heroCard() + logCard(m, mine, tz) + groupCard() + incidentsCard() + theoryCard() + chartCard();
+  app.innerHTML = heroCard() + logCard(m, mine, tz, logDate) + groupCard() + incidentsCard() + theoryCard() + chartCard();
   foot.innerHTML = 'Logged in as '+esc(m.name)+' &middot; '+esc(tzLabel(tz))+'. <button class="link" onclick="leaveMe()">not you?</button>';
+  mountWhenPickers();   // swap the two date/time placeholders for the custom pickers
   startClock();
 }
 

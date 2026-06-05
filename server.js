@@ -9,7 +9,7 @@ const DATA_FILE = path.join(__dirname, "data.json");
 const PUBLIC = path.join(__dirname, "public");
 const PALETTE = ["#E8654F", "#2A9D8F", "#E9A23B", "#6C5CE7"];
 // Fixed colors for the regulars; anyone else falls back to the palette by order.
-const NAMED_COLORS = { tim: "#3A7BD5", owan: "#E0A81C", owen: "#E0A81C", lyon: "#2E9E5B" };
+const NAMED_COLORS = { tim: "#2D65A4", owan: "#E0A81C", owen: "#E0A81C", lyon: "#2E9E5B" };
 function colorFor(name, i) { return NAMED_COLORS[String(name).trim().toLowerCase()] || PALETTE[i % PALETTE.length]; }
 
 let db = { members: [], entries: {}, incidents: [] };
@@ -32,6 +32,18 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 function clip(s, n) { return String(s == null ? "" : s).slice(0, n); }
 function tone(t) { return t === "negative" || t === "down" ? "negative" : "positive"; }
 function member(slug) { return db.members.find((m) => m.slug === slug); }
+// A log date must be a real calendar day (YYYY-MM-DD). Guards the backfill picker against
+// malformed or impossible keys ("9999-99-99", "2026-02-30") that would corrupt the store.
+function validDate(s) {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + "T00:00:00Z");
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+}
+// The logger's current calendar day in their own zone; used to reject future-dated backfills.
+function todayInTz(tz) {
+  try { return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+  catch (e) { return null; }
+}
 function send(res, code, obj) {
   res.writeHead(code, { "Content-Type": "application/json" });
   res.end(JSON.stringify(obj));
@@ -71,7 +83,10 @@ const server = http.createServer(async (req, res) => {
   if (url === "/api/log" && req.method === "POST") {
     const body = await readBody(req);
     const { slug, date, score, note, ts, tz } = body;
-    if (db.entries[slug] !== undefined && date) {
+    // Accept any valid, non-future calendar day so a day can be backfilled; silently
+    // ignore bad input (same convention as the other endpoints) and return the store as-is.
+    const today = todayInTz(tz);
+    if (db.entries[slug] !== undefined && validDate(date) && (!today || date <= today)) {
       db.entries[slug][date] = {
         score: Number(score),
         note: clip(note, 140),
