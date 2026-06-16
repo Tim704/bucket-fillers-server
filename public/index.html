@@ -324,6 +324,15 @@ function chartSVG() {
   const x = i => days.length<=1 ? pl+innerW/2 : pl + innerW*i/(days.length-1);
   const y = s => pt + innerH*(1-(s-1)/9);
   let svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">';
+  // highlight the days when everyone logged and everyone hit HAPPY or higher
+  const gap = days.length>1 ? innerW/(days.length-1) : innerW;
+  const bandW = Math.max(6, Math.min(gap*0.7, 34));
+  days.forEach((d,i) => {
+    const ss = DB.members.map(m => (DB.entries[m.slug]||{})[d] && DB.entries[m.slug][d].score);
+    if (!(DB.members.length>0 && ss.every(s => s != null && s>=HAPPY))) return;
+    const bx = Math.max(pl, x(i)-bandW/2), bxr = Math.min(W-pr, x(i)+bandW/2);
+    svg += '<rect x="'+bx+'" y="'+pt+'" width="'+(bxr-bx)+'" height="'+innerH+'" rx="3" style="fill:var(--goodbg)"/>';
+  });
   for (let s=2; s<=10; s+=2){ svg += '<line x1="'+pl+'" y1="'+y(s)+'" x2="'+(W-pr)+'" y2="'+y(s)+'" style="stroke:var(--hair)"/>'; svg += '<text x="'+(pl-6)+'" y="'+(y(s)+4)+'" font-size="11" style="fill:var(--muted2)" text-anchor="end">'+s+'</text>'; }
   svg += '<line x1="'+pl+'" y1="'+y(HAPPY)+'" x2="'+(W-pr)+'" y2="'+y(HAPPY)+'" style="stroke:var(--gold)" stroke-dasharray="4 4"/>';
   days.forEach((d,i) => { if (days.length<=8 || i%Math.ceil(days.length/8)===0) svg += '<text x="'+x(i)+'" y="'+(H-8)+'" font-size="10" style="fill:var(--muted2)" text-anchor="middle">'+shortDate(d)+'</text>'; });
@@ -564,9 +573,9 @@ function clashSection() {
 }
 
 function chartCard() {
-  return '<div class="card"><h2>Every bucket, over time</h2><p class="hint">Where the lines rise together, your good days are syncing up.</p>'
+  return '<div class="card"><h2>Every bucket, over time</h2><p class="hint">Where the lines rise together, your good days are syncing up. Shaded days are when all '+DB.members.length+' of you hit '+HAPPY+' or higher.</p>'
     + chartSVG()
-    + '<div class="legend" style="margin-top:8px">'+DB.members.map(p=>'<span style="color:'+p.color+'">&#9679; '+esc(p.name)+'</span>').join("")+'</div></div>';
+    + '<div class="legend" style="margin-top:8px">'+DB.members.map(p=>'<span style="color:'+p.color+'">&#9679; '+esc(p.name)+'</span>').join("")+'<span style="color:#2A9D8F">&#9632; everyone '+HAPPY+'+</span></div></div>';
 }
 
 // Custom date/time pickers replace the two native datetime-local inputs (log + incident
