@@ -88,6 +88,26 @@
   .substat { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hair); }
   .stat-grid.two { grid-template-columns: repeat(2, 1fr); }
 
+  /* --- The log book: one collapsible table of every past rating + note --- */
+  .disc { margin-top: 4px; }
+  .disc > summary { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; user-select: none; font-weight: 700; font-size: 14px; color: var(--ink); border: 1.5px solid var(--ink); border-radius: 12px; padding: 10px 16px; background: var(--card); box-shadow: 3px 3px 0 var(--shadow); transition: transform .08s, box-shadow .08s; }
+  .disc > summary::-webkit-details-marker { display: none; }
+  .disc > summary::before { content: "\25B8"; font-size: 12px; transition: transform .15s ease; }
+  .disc > summary:hover { transform: translate(-1px,-1px); }
+  .disc[open] > summary { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); margin-bottom: 14px; }
+  .disc[open] > summary::before { transform: rotate(90deg); }
+  .logwrap { max-height: 60vh; overflow: auto; border: 1.5px solid var(--ink); border-radius: 14px; }
+  .logtable { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .logtable th, .logtable td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--hair); }
+  .logtable thead th { position: sticky; top: 0; z-index: 1; background: var(--inset); font-size: 12px; border-bottom: 1.5px solid var(--ink); }
+  .logtable tbody tr:last-child td { border-bottom: none; }
+  .logtable tr.good td { background: var(--goodbg); }
+  .logtable .ld { white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .logtable .lrel { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); margin-top: 2px; }
+  .logtable .ls { font-family: 'Fraunces', serif; font-weight: 900; font-size: 22px; line-height: 1; }
+  .logtable .ln { font-size: 12px; color: var(--muted); margin-top: 3px; max-width: 26ch; }
+  .logtable .lo { color: var(--muted3); font-size: 18px; }
+
   /* --- Right now: live clocks + timezones --- */
   .hero { background: linear-gradient(180deg, var(--card), var(--hero)); }
   .kick2 { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 700; color: var(--gold); }
@@ -209,6 +229,8 @@ function offsetLabel(tz) { try { const p = new Intl.DateTimeFormat("en-GB", { ti
 function tzLabel(tz) { const p = TZ_PRESETS.find(x => x.tz === tz); return p ? p.label : String(tz||"").split("/").pop().replace(/_/g, " "); }
 function allZones() { try { return Intl.supportedValuesOf("timeZone"); } catch (e) { return TZ_PRESETS.map(p => p.tz).concat([DEVICE_TZ, "UTC"]); } }
 const shortDate = (iso) => { const p = iso.split("-"); return p[2]+"/"+p[1]; };
+// Short weekday ("Mon") for a fixed YYYY-MM-DD, read at UTC-noon so no timezone shifts the day.
+function shortWeekday(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso||""); if (!m) return ""; try { return new Intl.DateTimeFormat("en-GB", { timeZone:"UTC", weekday:"short" }).format(new Date(Date.UTC(+m[1], +m[2]-1, +m[3], 12))); } catch (e) { return ""; } }
 // Shift a YYYY-MM-DD calendar day by whole days (UTC math keeps it DST-proof and tz-agnostic).
 function shiftDay(iso, delta) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso); if (!m) return iso; const d = new Date(Date.UTC(+m[1], +m[2]-1, +m[3])); d.setUTCDate(d.getUTCDate()+delta); return d.toISOString().slice(0,10); }
 // Whole days between two YYYY-MM-DD strings (isoA - isoB), via UTC midnight.
@@ -472,6 +494,34 @@ function groupCard() {
     + '<div class="today-grid">'+cells+'</div>'+banner+'</div>';
 }
 
+// The log book: every logged day for everyone, newest first, ratings + notes in one table.
+// Collapsed inside a <details> so the dashboard stays light until you ask to see it. Rows where
+// all of you logged AND all hit HAPPY get the same green the chart uses for a shared good day.
+function historyCard() {
+  const dates = new Set();
+  DB.members.forEach(p => Object.keys(DB.entries[p.slug]||{}).forEach(d => dates.add(d)));
+  const days = [...dates].sort().reverse();   // newest first
+  if (!days.length) return "";                // nothing logged yet -> no card at all
+  const today = dateInTz(myTz());
+  const head = '<tr><th>Day</th>' + DB.members.map(p => '<th style="color:'+p.color+'">'+esc(p.name)+'</th>').join("") + '</tr>';
+  const rows = days.map(d => {
+    const es = DB.members.map(p => (DB.entries[p.slug]||{})[d]);
+    const allGood = DB.members.length > 0 && es.every(e => e && e.score >= HAPPY);
+    const off = daysBetween(today, d);
+    const rel = off === 0 ? "Today" : off === 1 ? "Yesterday" : "";
+    const dayCell = '<td class="ld">'+esc(shortWeekday(d))+' '+esc(shortDate(d))+(rel?'<span class="lrel">'+rel+'</span>':'')+'</td>';
+    const cells = es.map(e => e
+      ? '<td><span class="ls">'+e.score+'</span>'+(e.note?'<div class="ln">'+esc(e.note)+'</div>':'')+'</td>'
+      : '<td><span class="lo">&mdash;</span></td>').join("");
+    return '<tr'+(allGood?' class="good"':'')+'>'+dayCell+cells+'</tr>';
+  }).join("");
+  return '<div class="card"><h2>The log book</h2>'
+    + '<p class="hint">Every bucket so far &mdash; each day&rsquo;s rating and note for all '+DB.members.length+' of you, newest first.</p>'
+    + '<details class="disc"><summary>Show past logs &middot; '+days.length+' day'+(days.length>1?'s':'')+'</summary>'
+    + '<div class="logwrap"><table class="logtable"><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div>'
+    + '</details></div>';
+}
+
 function toneToggle(key, cur) {
   return '<div class="tonetoggle" id="tt_'+key+'">'
     + '<button class="tt up'+(cur==="positive"?" on":"")+'" onclick="setTone(\''+key+'\',\'positive\')">'+TONES.positive.sym+' good</button>'
@@ -630,7 +680,7 @@ function render() {
   const mine = (DB.entries[m.slug]||{})[logDate];
   if (mine && score === 7 && !note) { score = mine.score; note = mine.note || ""; }
 
-  app.innerHTML = heroCard() + logCard(m, mine, tz, logDate) + groupCard() + incidentsCard() + theoryCard() + chartCard();
+  app.innerHTML = heroCard() + logCard(m, mine, tz, logDate) + groupCard() + historyCard() + incidentsCard() + theoryCard() + chartCard();
   foot.innerHTML = 'Logged in as '+esc(m.name)+' &middot; '+esc(tzLabel(tz))+'. <button class="link" onclick="leaveMe()">not you?</button>';
   mountWhenPickers();   // swap the two date/time placeholders for the custom pickers
   startClock();
